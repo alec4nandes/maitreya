@@ -16,10 +16,9 @@
 
         <script type="module">
             import {ask} from "./openai.js";
-            const responseElem = document.querySelector("#response");
-            document
-                .querySelector("form")
-                .onsubmit = (event) => ask({event, responseElem});
+            const formElem = document.querySelector("form"),
+                responseElem = document.querySelector("#response");
+            formElem.onsubmit = (event) => ask({event, responseElem});
         </script>
     </body>
 </html>
