@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <title>Maitreya</title>
+    </head>
+    <body>
+        <h1>Maitreya</h1>
+        <form>
+            <textarea name="prompt"></textarea>
+            <button type="submit">ask</button>
+        </form>
+        <pre id="response"></pre>
+
+        <script type="module">
+            import {ask} from "./openai.js";
+            const responseElem = document.querySelector("#response");
+            document
+                .querySelector("form")
+                .onsubmit = (event) => ask({event, responseElem});
+        </script>
+    </body>
+</html>

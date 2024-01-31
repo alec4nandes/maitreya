@@ -1,0 +1,36 @@
+body {
+    background-color: #333;
+    color: #eee;
+    margin: 50px 15px;
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: auto;
+
+    & textarea {
+        height: 120px;
+        box-sizing: border-box;
+    }
+
+    & button[type="submit"] {
+        width: 100px;
+        margin: auto;
+    }
+}
+
+#response {
+    max-width: 600px;
+    width: 100%;
+    margin: 30px auto 0;
+    text-align: center;
+    white-space: break-spaces;
+}
