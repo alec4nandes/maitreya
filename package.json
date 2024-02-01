@@ -1,0 +1,16 @@
+{
+    "name": "maitreya",
+    "version": "1.0.0",
+    "description": "",
+    "main": "openai.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "firebase": "firebase serve --only hosting"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "firebase": "^10.7.2"
+    }
+}

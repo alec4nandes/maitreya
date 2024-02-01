@@ -15,10 +15,10 @@
         <pre id="response"></pre>
 
         <script type="module">
-            import {ask} from "./openai.js";
+            import {readStream} from "./openai.js";
             const formElem = document.querySelector("form"),
                 responseElem = document.querySelector("#response");
-            formElem.onsubmit = (event) => ask({event, responseElem});
+            formElem.onsubmit = (event) => readStream({event, responseElem});
         </script>
     </body>
 </html>
