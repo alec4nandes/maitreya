@@ -1,11 +1,13 @@
 async function readStream({ event, responseElem }) {
-    event.preventDefault();
     try {
+        event.preventDefault();
         responseElem.textContent = "Asking...";
         const prompt = event.target.prompt.value.trim(),
-            reader = (await fetchStream(prompt)).getReader();
+            stream = await fetchStream(prompt),
+            reader = stream.getReader();
         // read() returns a promise that fulfills
         // when a value has been received
+        responseElem.textContent = "";
         reader.read().then(function processText({ done, value }) {
             // Result objects contain two properties:
             // done  - true if the stream has already given you all its data.
@@ -14,7 +16,7 @@ async function readStream({ event, responseElem }) {
                 console.log("Stream complete!");
             } else {
                 const decoded = new TextDecoder().decode(value);
-                responseElem.textContent += decoded;
+                responseElem.textContent += parseDecoded(decoded);
             }
             // Read some more, and call this function again
             return !done && reader.read().then(processText);
@@ -34,6 +36,25 @@ async function fetchStream(prompt) {
         }
     );
     return response.body;
+}
+
+function parseDecoded(chunk) {
+    const data = chunk
+        .split("data:")
+        .map((line) => {
+            try {
+                return JSON.parse(line.trim());
+            } catch (err) {
+                return "";
+            }
+        })
+        .filter(Boolean)
+        .map(({ choices }) => choices)
+        .flat(Infinity)
+        .filter(Boolean)
+        .map(({ delta }) => delta?.content)
+        .join("");
+    return data;
 }
 
 export { readStream };
