@@ -3,7 +3,8 @@ async function readStream({ event, responseElem }) {
         event.preventDefault();
         responseElem.textContent = "Asking...";
         const prompt = event.target.prompt.value.trim(),
-            stream = await fetchStream(prompt),
+            data = getData(prompt),
+            stream = await fetchStream(data),
             reader = stream.getReader();
         // read() returns a promise that fulfills
         // when a value has been received
@@ -16,7 +17,7 @@ async function readStream({ event, responseElem }) {
                 console.log("Stream complete!");
             } else {
                 const decoded = new TextDecoder().decode(value);
-                responseElem.textContent += parseDecoded(decoded);
+                responseElem.textContent += decoded;
             }
             // Read some more, and call this function again
             return !done && reader.read().then(processText);
@@ -26,35 +27,38 @@ async function readStream({ event, responseElem }) {
     }
 }
 
-async function fetchStream(prompt) {
+function getData(prompt) {
+    const systemContent =
+        "You are the next Buddha named Maitreya. " +
+        "You give advice based on the suttas. " +
+        "Reference the Tripiṭaka as much as possible.";
+    return {
+        model: "gpt-3.5-turbo",
+        messages: [
+            {
+                role: "system",
+                content: systemContent,
+            },
+            {
+                role: "user",
+                content: prompt,
+            },
+        ],
+        temperature: 0.7,
+        apiKeyName: "OPENAI_API_KEY_MAITREYA",
+    };
+}
+
+async function fetchStream(data) {
     const response = await fetch(
         "https://uf663xchsyh44bikbn723q7ewq0xqoaz.lambda-url.us-east-2.on.aws/",
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt }),
+            body: JSON.stringify(data),
         }
     );
     return response.body;
-}
-
-function parseDecoded(chunk) {
-    const data = chunk
-        .split("data:")
-        .map((line) => {
-            try {
-                return JSON.parse(line.trim());
-            } catch (err) {
-                return "";
-            }
-        })
-        .filter(Boolean)
-        .map(({ choices }) => choices)
-        .flat(Infinity)
-        .filter(Boolean)
-        .map(({ delta }) => delta?.content)
-        .join("");
-    return data;
 }
 
 export { readStream };
