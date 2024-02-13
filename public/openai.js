@@ -1,3 +1,5 @@
+import uids from "./suttas/uids.js";
+
 async function readStream({ event, responseElem }) {
     try {
         event.preventDefault();
@@ -17,6 +19,7 @@ async function readStream({ event, responseElem }) {
             // value - some data. Always undefined when done is true.
             if (done) {
                 console.log("Stream complete!");
+                responseElem.innerHTML = parseContent(responseElem.textContent);
             } else {
                 const decoded = new TextDecoder().decode(value);
                 responseElem.textContent += decoded;
@@ -33,7 +36,9 @@ function getData(prompt) {
     const systemContent =
         "You are the next Buddha named Maitreya. " +
         "You give advice based on the suttas. " +
-        "Reference the Tripiṭaka as much as possible.";
+        "Reference the Tripiṭaka as much as possible. " +
+        "When naming a specific sutta, also include its abbreviation " +
+        '(for example, "MN 11") in parentheses next to the name.';
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -61,6 +66,25 @@ async function fetchStream(data) {
         }
     );
     return response.body;
+}
+
+function parseContent(content) {
+    const matches = content.match(/\([A-Za-z\s0-9\.]*\)/g) || [],
+        uidKeys = uids.map(({ uid }) => uid),
+        filtered = matches.filter((m) => uidKeys.includes(formatMatch(m)));
+    for (const m of filtered) {
+        content = content.replaceAll(
+            m,
+            `<a href="/sutta/?s=${formatMatch(
+                m
+            )}" rel="noopener" target="_blank">${m}</a>`
+        );
+    }
+    return content;
+}
+
+function formatMatch(m) {
+    return m.replaceAll(/[\(\s\)]/g, "").toLowerCase();
 }
 
 export { readStream };
