@@ -8,6 +8,10 @@
 a {
     color: var(--accent-3);
     font-weight: bold;
+
+    &:hover {
+        color: var(--accent-2);
+    }
 }
 
 body {

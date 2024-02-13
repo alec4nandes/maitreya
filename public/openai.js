@@ -71,14 +71,17 @@ async function fetchStream(data) {
 function parseContent(content) {
     const matches = content.match(/\([A-Za-z\s0-9\.]*\)/g) || [],
         uidKeys = uids.map(({ uid }) => uid),
-        filtered = matches.filter((m) => uidKeys.includes(formatMatch(m)));
-    for (const m of filtered) {
-        content = content.replaceAll(
-            m,
-            `<a href="/sutta/?s=${formatMatch(
-                m
-            )}" rel="noopener" target="_blank">${m}</a>`
-        );
+        filtered = matches.map((m) => {
+            const key = uidKeys.find((uid) => uid.includes(formatMatch(m)));
+            return [m, key];
+        });
+    for (const [m, key] of filtered) {
+        if (key) {
+            content = content.replaceAll(
+                m,
+                `<a href="/sutta/?s=${key}" rel="noopener" target="_blank">${m}</a>`
+            );
+        }
     }
     return content;
 }
