@@ -5,7 +5,7 @@
     "main": "openai.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "firebase": "firebase serve --only hosting",
+        "firebase": "firebase serve --port 9271 --only hosting",
         "deploy": "deploy.bat"
     },
     "keywords": [],

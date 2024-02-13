@@ -1,6 +1,7 @@
 async function readStream({ event, responseElem }) {
     try {
         event.preventDefault();
+        responseElem.style.textAlign = "center";
         responseElem.textContent = "Asking...";
         const prompt = event.target.prompt.value.trim(),
             data = getData(prompt),
@@ -9,6 +10,7 @@ async function readStream({ event, responseElem }) {
         // read() returns a promise that fulfills
         // when a value has been received
         responseElem.textContent = "";
+        responseElem.style.textAlign = "left";
         reader.read().then(function processText({ done, value }) {
             // Result objects contain two properties:
             // done  - true if the stream has already given you all its data.

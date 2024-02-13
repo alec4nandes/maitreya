@@ -1,11 +1,54 @@
+:root {
+    --accent-1: #413c58;
+    --accent-2: #d1ede6;
+    --accent-3: #e7efc5;
+    --accent-4: #fffcf2;
+}
+
 body {
-    background-color: #333;
-    color: #eee;
+    background-color: var(--accent-1);
     margin: 50px 15px;
 }
 
+body,
+input,
+textarea,
+pre {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button {
+    background-color: var(--accent-2);
+    font-weight: bold;
+
+    &:hover {
+        background-color: var(--accent-3);
+        cursor: pointer;
+    }
+}
+
+button,
 h1 {
-    text-align: center;
+    font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+button,
+input,
+textarea {
+    min-width: 100px;
+    appearance: none;
+    border: 0;
+    border-radius: 7px;
+    color: var(--accent-1);
+    padding: 5px;
+}
+
+button,
+input,
+textarea,
+pre {
+    font-size: 1rem;
+    line-height: 1.4rem;
 }
 
 form {
@@ -22,15 +65,25 @@ form {
     }
 
     & button[type="submit"] {
-        width: 100px;
         margin: auto;
     }
+}
+
+h1 {
+    color: var(--accent-2);
+    text-align: center;
+}
+
+input,
+textarea {
+    background-color: var(--accent-4);
+    color: var(--accent-1);
 }
 
 #response {
     max-width: 600px;
     width: 100%;
+    color: var(--accent-4);
     margin: 30px auto 0;
-    text-align: center;
     white-space: break-spaces;
 }
