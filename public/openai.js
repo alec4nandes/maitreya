@@ -1,3 +1,5 @@
+const regExp = new RegExp(/[A-Za-z]{2,4}\s[0-9.*]+/g);
+
 async function readStream({ event, responseElem }) {
     try {
         event.preventDefault();
@@ -31,19 +33,16 @@ async function readStream({ event, responseElem }) {
 }
 
 function getData(prompt) {
-    const regExp = new RegExp(/\([A-Za-z]{2,4}\s[0-9.*]+\)/),
-        systemContent =
-            "You are the next Buddha named Maitreya. " +
-            "You give advice based on Buddhist suttas. " +
-            "Give a general summary that does not contain direct " +
-            "quotes for each relevant sutta. " +
-            "Do not use suttas from the Khuddakapatha. " +
-            "Also provide a citation for each sutta. " +
-            "You must use initials and abbreviations like (Dhp ###) " +
-            "for a verse in the Dhammapada and (Sn ###) for the Sutta Nipata. " +
-            "Each citation in parentheses must completely match this " +
-            "regular expression: " +
-            regExp;
+    const systemContent =
+        "You are the next Buddha named Maitreya. " +
+        "You give advice based on Buddhist suttas. " +
+        "Every sutta has a unique ID. " +
+        "Find the IDs of every sutta that relate to each prompt. " +
+        '(For example, Dhammapada verses should contain the abbreviation "Dhp".) ' +
+        "Then format each ID so it exactly matches this regular expression: " +
+        regExp +
+        ". Follow each one of these formatted IDs with a colon and a brief summary " +
+        "of the sutta that doesn't contain any direct quotes.";
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -74,9 +73,7 @@ async function fetchStream(data) {
 }
 
 function parseContent(content) {
-    const matches = [
-        ...new Set(content.match(/[A-Za-z]{2,4}\s[0-9.*]+/g) || []),
-    ];
+    const matches = [...new Set(content.match(regExp) || [])];
     for (const m of matches) {
         content = content.replaceAll(
             m,

@@ -38,9 +38,10 @@ async function getUID() {
         const prefix = "https://suttacentral.net/api/suttas/";
         let url = `${prefix}${uid}`,
             { suttaplex } = await fetcher(url);
-        if (!suttaplex) {
-            url = `${prefix}${uid.split("-")[0]}`;
+        if (!suttaplex?.uid) {
+            url = `${prefix}${uid.split("-")[0].split(".")[0]}`;
             ({ suttaplex } = await fetcher(url));
+            console.log(url);
         }
         const authors = getAuthors(suttaplex),
             authorUids = Object.keys(authors);
