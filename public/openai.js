@@ -1,5 +1,3 @@
-import uids from "./suttas/uids.js";
-
 async function readStream({ event, responseElem }) {
     try {
         event.preventDefault();
@@ -38,7 +36,9 @@ function getData(prompt) {
         "You give advice based on the suttas. " +
         "Reference the Tripiṭaka as much as possible. " +
         "When naming a specific sutta, also include its abbreviation " +
-        '(for example, "MN 11") in parentheses next to the name.';
+        '(for example, "MN 11") in parentheses next to the name. ' +
+        "If you mention a verse from the Dhammapada, use the abbreviation " +
+        '"DHP" along with the verse number (for example "DHP 183").';
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -69,19 +69,16 @@ async function fetchStream(data) {
 }
 
 function parseContent(content) {
-    const matches = content.match(/\([A-Za-z\s0-9\.]*\)/g) || [],
-        uidKeys = uids.map(({ uid }) => uid),
-        filtered = matches.map((m) => {
-            const key = uidKeys.find((uid) => uid.includes(formatMatch(m)));
-            return [m, key];
-        });
-    for (const [m, key] of filtered) {
-        if (key) {
-            content = content.replaceAll(
-                m,
-                `<a href="/sutta/?s=${key}" rel="noopener" target="_blank">${m}</a>`
-            );
-        }
+    const matches = [
+        ...new Set(content.match(/\([A-Za-z]+[\s]*[0-9+\.*]+\)/g) || []),
+    ];
+    for (const m of matches) {
+        content = content.replaceAll(
+            m,
+            `<a href="/suttas/?uid=${formatMatch(
+                m
+            )}" rel="noopener" target="_blank">${m}</a>`
+        );
     }
     return content;
 }
