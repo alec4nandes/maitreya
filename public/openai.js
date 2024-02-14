@@ -1,4 +1,4 @@
-const regExp = new RegExp(/[A-Za-z]{2,4}\s[0-9.*]+/g);
+const regExp = new RegExp(/[A-Za-z]{2,4}[ ]*[0-9]+[\.0-9]*/g);
 
 async function readStream({ event, responseElem }) {
     try {
