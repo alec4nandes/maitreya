@@ -12,21 +12,18 @@
         <nav>
             <a href="/">Home</a>
         </nav>
-        <form action="">
+        <form id="pick-sutta">
             <select name="uid"></select>
+            by <select name="author"></select>
             <button type="submit">look up</button>
         </form>
         <div id="title"></div>
         <div id="sutta"></div>
 
         <script type="module">
-            import uids from "./uids.js";
+            import buildSelects from "./selects.js";
             import getSutta from "./get-sutta.js";
-            const selectUid = document.querySelector("select[name='uid']"),
-                uidKeys = Object.keys(uids);
-            selectUid.innerHTML = uidKeys
-                .map(key => `<option value="${key}">${key}</option>`)
-                .join("");
+            buildSelects();
             getSutta();
         </script>
     </body>

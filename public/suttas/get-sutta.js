@@ -1,11 +1,17 @@
+import { getSelect, addOptions } from "./selects.js";
+
 async function getSutta() {
     const { uid, authors } = await getUID();
     if (!uid) {
         return;
     }
-    document.querySelector("select[name='uid']").value = uid;
-    // TODO: toggle between different authors if multiple
-    const author = getRandom(Object.keys(authors));
+    const authorUids = Object.keys(authors),
+        author = getRandom(authorUids),
+        selectAuthor = getSelect("author"),
+        selectUid = getSelect("uid");
+    addOptions(selectAuthor, authorUids, true);
+    selectAuthor.value = author;
+    selectUid.value = uid;
     let url = `https://suttacentral.net/api/bilarasuttas/${uid}/${author}`,
         { translation_text: text } = await fetcher(url);
     if (text) {

@@ -6,6 +6,25 @@ body {
     text-align: center;
 }
 
+form#pick-sutta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    & select {
+        &[name="uid"] {
+            min-width: fit-content;
+            width: fit-content;
+        }
+
+        &[name="author"] {
+            width: 160px;
+        }
+    }
+}
+
 #sutta {
     max-width: 650px;
     width: fit-content;
@@ -28,9 +47,10 @@ body {
 }
 
 #title {
+    line-height: initial;
     margin: 20px auto;
 
     & > * {
-        margin: 0 auto;
+        margin: 8px auto;
     }
 }
