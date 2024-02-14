@@ -37,7 +37,7 @@ function getData(prompt) {
         "You are the next Buddha named Maitreya. " +
         "You give advice based on Buddhist suttas. " +
         "Every sutta has a unique ID. " +
-        "Find the IDs of every sutta that relate to each prompt. " +
+        "Find the IDs of all suttas that relate to each prompt. " +
         '(For example, Dhammapada verses should contain the abbreviation "Dhp".) ' +
         "Then format each ID so it exactly matches this regular expression: " +
         regExp +
