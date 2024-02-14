@@ -11,6 +11,8 @@
         <h1>Suttas</h1>
         <nav>
             <a href="/">Home</a>
+            &nbsp; | &nbsp;
+            <a href="" id="random">Random Sutta</a>
         </nav>
         <form id="pick-sutta">
             <select name="uid"></select>
@@ -23,9 +25,15 @@
 
         <script type="module">
             import buildSelects from "./selects.js";
-            import getSutta from "./get-sutta.js";
+            import getSutta, {getRandom} from "./get-sutta.js";
+            import uids from "./uids.js";
             buildSelects();
             getSutta();
+            const randomUid = getRandom(Object.keys(uids)),
+                randomAuthor = getRandom(uids[randomUid]);
+            document
+                .querySelector("#random")
+                .href = `?uid=${randomUid}&author=${randomAuthor}`;
         </script>
     </body>
 </html>

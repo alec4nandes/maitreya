@@ -145,3 +145,4 @@ function getCopyrightIndex(lines) {
 }
 
 export default getSutta;
+export { getRandom };

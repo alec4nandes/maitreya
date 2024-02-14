@@ -12,17 +12,6 @@ form#pick-sutta {
     justify-content: center;
     flex-wrap: wrap;
     gap: 8px;
-
-    & select {
-        &[name="uid"] {
-            min-width: fit-content;
-            width: fit-content;
-        }
-
-        &[name="author"] {
-            width: 160px;
-        }
-    }
 }
 
 #sutta {
