@@ -3,64 +3,82 @@
     the SuttaCentral git repo for any new UIDs.
     An UID (aka "mn11") refers to a specific sutta.
     
-    First, clone the repo into this file's parent directory:
+    Run this file:
         cd public/suttas
-        git clone https://github.com/sc-voice/sc-api
-    Then run this file:
         node crawl.js
 */
 
-const fs = require("fs"),
-    glob = require("glob");
+const fs = require("fs");
 
-getDirectories("sc-api/api", function (err, res) {
-    if (err) {
-        console.log("Error", err);
-    } else {
-        const uids = [],
-            authorInfo = {};
-        res.filter((file) => file.includes(".json")).forEach((file) =>
-            getJSON(file, uids, authorInfo)
-        );
-        uids.sort(sortUID);
-        const str = `
-            const uids = [${uids.map(JSON.stringify).join(",")}];
+crawl();
+
+async function crawl() {
+    const abbvs = await getAbbreviations();
+    let authors = {},
+        result = {};
+    for (const abbv of abbvs) {
+        result = { ...result, ...(await getChapter(abbv, authors)) };
+    }
+    authors = sortObject(authors);
+    result = sortObject(result);
+    const str = `
+            const uids = ${JSON.stringify(result)};
             
-            const authors = ${JSON.stringify(authorInfo)};
+            const authors = ${JSON.stringify(authors)};
             
             export default uids;
             export { authors };
         `;
-        fs.writeFile("uids.js", str, function () {});
-    }
-});
-
-function getDirectories(src, callback) {
-    glob(src + "/**/*", callback);
+    fs.writeFile("uids.js", str, function () {});
 }
 
-function getJSON(fileName, uids, authorInfo) {
-    const { value } = JSON.parse(fs.readFileSync(fileName)),
-        data = value
-            .map(({ uid, translations }) => {
-                const english = translations.filter(
-                        ({ lang }) => lang === "en"
-                    ),
-                    authors = english.map(({ author, author_uid }) => {
-                        authorInfo[author_uid] = author;
-                        return author_uid;
-                    });
-                if (authors.length) {
-                    return { uid, authors };
-                }
-            })
-            .filter(Boolean);
-    uids.push(...data);
+async function getAbbreviations() {
+    const url = "https://suttacentral.net/api/expansion",
+        data = await fetcher(url);
+    return data.map((d) => Object.keys(d)).flat(Infinity);
+}
+
+async function fetcher(url) {
+    return await (await fetch(url)).json();
+}
+
+async function getChapter(chapter, authors) {
+    const url = `https://suttacentral.net/api/suttaplex/${chapter}`,
+        data = await fetcher(url),
+        uids = data.filter(
+            ({ uid }) => uid && [...uid].find((char) => !isNaN(char))
+        ),
+        result = {};
+    for (const { uid, translations } of uids) {
+        const english = translations
+            .filter(
+                ({ lang, author, author_uid }) =>
+                    lang === "en" && author && author_uid
+            )
+            .map(({ author, author_uid }) => {
+                authors[author_uid] = author;
+                return author_uid;
+            });
+        if (english.length) {
+            result[uid] = english;
+        }
+    }
+    return result;
+}
+
+function sortObject(obj) {
+    const keys = Object.keys(obj).sort(sortUID),
+        result = {};
+    keys.forEach(
+        (key) =>
+            (result[key] = Array.isArray(obj[key]) ? obj[key].sort() : obj[key])
+    );
+    return result;
 }
 
 function sortUID(a, b) {
-    const [aChap, aNum] = splitUID(a.uid),
-        [bChap, bNum] = splitUID(b.uid),
+    const [aChap, aNum] = splitUID(a),
+        [bChap, bNum] = splitUID(b),
         compareChaps = aChap.localeCompare(bChap);
     if (compareChaps) {
         return compareChaps;

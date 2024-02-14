@@ -1,0 +1,36 @@
+a.ref {
+    display: none;
+}
+
+body {
+    text-align: center;
+}
+
+#sutta {
+    max-width: 650px;
+    width: fit-content;
+    margin: auto;
+
+    & table td {
+        vertical-align: top;
+
+        &:first-child {
+            color: #d1ede6;
+            font-size: 0.8rem;
+            padding-right: 10px;
+            text-align: right;
+        }
+
+        &:last-child {
+            text-align: left;
+        }
+    }
+}
+
+#title {
+    margin: 20px auto;
+
+    & > * {
+        margin: 0 auto;
+    }
+}
