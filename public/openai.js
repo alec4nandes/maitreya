@@ -1,4 +1,4 @@
-const regExp = new RegExp(/[A-Za-z]{2,4}[ ]*[0-9]+[\.0-9]*/g);
+const regExp = new RegExp(/[A-Za-z]{2,4}[0-9]+[\.0-9\-]*/g);
 
 async function readStream({ event, responseElem }) {
     try {
@@ -39,9 +39,8 @@ function getData(prompt) {
         "Every sutta has a unique ID. " +
         "Find the IDs of all suttas that relate to each prompt. " +
         '(For example, Dhammapada verses should contain the abbreviation "Dhp".) ' +
-        "Then format each ID so it exactly matches this regular expression: " +
-        regExp +
-        ". Follow each one of these formatted IDs with a colon and a brief summary " +
+        "Every ID must have absolutely no whitespace, but dots and periods are okay. " +
+        "Follow each one of these formatted IDs with a colon and a brief summary " +
         "of the sutta that doesn't contain any direct quotes.";
     return {
         model: "gpt-3.5-turbo",
