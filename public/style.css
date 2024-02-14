@@ -80,7 +80,6 @@ form#ask {
 
     & textarea {
         height: 120px;
-        box-sizing: border-box;
     }
 
     & button[type="submit"] {
