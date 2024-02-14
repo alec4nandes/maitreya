@@ -1,14 +1,18 @@
 import { getSelect, addOptions } from "./selects.js";
 
 async function getSutta() {
-    const { uid, authors } = await getUID();
+    const { uid, authors, author: authorParam } = await getUID();
     if (!uid) {
         return;
     }
     const authorUids = Object.keys(authors),
-        author = getRandom(authorUids),
+        author = authorParam || getRandom(authorUids),
         selectAuthor = getSelect("author"),
         selectUid = getSelect("uid");
+    if (!authorParam) {
+        const newUrl = window.location.href + `&author=${author}`;
+        window.history.pushState({ path: newUrl }, "", newUrl);
+    }
     addOptions(selectAuthor, authorUids, true);
     selectAuthor.value = author;
     selectUid.value = uid;
@@ -25,8 +29,8 @@ async function getSutta() {
 }
 
 async function getUID() {
-    const params = new URL(document.location).searchParams,
-        uid = params.get("uid");
+    const uid = getSearchParam("uid"),
+        author = getSearchParam("author");
     if (!uid) {
         return { uid: null };
     }
@@ -38,14 +42,24 @@ async function getUID() {
             url = `${prefix}${uid.split("-")[0]}`;
             ({ suttaplex } = await fetcher(url));
         }
-        const authors = getAuthors(suttaplex);
-        return Object.keys(authors).length
-            ? { uid: suttaplex.uid, authors }
+        const authors = getAuthors(suttaplex),
+            authorUids = Object.keys(authors);
+        return authorUids.length
+            ? {
+                  uid: suttaplex.uid,
+                  authors,
+                  author: authorUids.includes(author) && author,
+              }
             : { uid: null };
     } catch (err) {
         console.error(err);
         return { uid: null };
     }
+}
+
+function getSearchParam(param) {
+    const params = new URL(document.location).searchParams;
+    return params.get(param);
 }
 
 function getAuthors(suttaplex) {

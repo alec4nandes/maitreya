@@ -42,7 +42,6 @@ button {
 
     &:hover {
         background-color: var(--accent-3);
-        cursor: pointer;
     }
 }
 
@@ -61,6 +60,13 @@ textarea {
     border-radius: 7px;
     color: var(--accent-1);
     padding: 5px;
+}
+
+button,
+select {
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 form#ask {
@@ -90,7 +96,6 @@ input,
 select,
 textarea {
     background-color: var(--accent-4);
-    color: var(--accent-1);
 }
 
 nav {
@@ -103,4 +108,11 @@ nav {
     width: 100%;
     margin: 30px auto 0;
     white-space: break-spaces;
+}
+
+select {
+    background-image: url("/assets/select-arrow.png");
+    background-position: center right 3px;
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
 }
