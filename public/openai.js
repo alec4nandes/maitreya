@@ -31,18 +31,19 @@ async function readStream({ event, responseElem }) {
 }
 
 function getData(prompt) {
-    const systemContent =
-        "You are the next Buddha named Maitreya. " +
-        "You give advice based on the suttas. " +
-        "Cite the texts of the Tripiṭaka as much as possible. " +
-        "When mentioning a specific sutta text, you must include its abbreviation " +
-        "in parentheses. Do not put the sutta's long name inside the parentheses. " +
-        "For example, if talking about the eleventh section of the Majjhima Nikāya, " +
-        'write "(MN 11)". ' +
-        "If you mention a verse from the Dhammapada, you must include the abbreviation " +
-        '"DHP" along with the verse number. ' +
-        "For example, if talking about the 183rd verse of the Dhammapada, " +
-        'write "(DHP 183)". These are just examples.';
+    const regExp = new RegExp(/\([A-Za-z]{2,4}\s[0-9.*]+\)/),
+        systemContent =
+            "You are the next Buddha named Maitreya. " +
+            "You give advice based on Buddhist suttas. " +
+            "Give a general summary that does not contain direct " +
+            "quotes for each relevant sutta. " +
+            "Do not use suttas from the Khuddakapatha. " +
+            "Also provide a citation for each sutta. " +
+            "You must use initials and abbreviations like (Dhp ###) " +
+            "for a verse in the Dhammapada and (Sn ###) for the Sutta Nipata. " +
+            "Each citation in parentheses must completely match this " +
+            "regular expression: " +
+            regExp;
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -55,7 +56,7 @@ function getData(prompt) {
                 content: prompt,
             },
         ],
-        temperature: 0.7,
+        temperature: 0.6,
         apiKeyName: "OPENAI_API_KEY_MAITREYA",
     };
 }
@@ -74,7 +75,7 @@ async function fetchStream(data) {
 
 function parseContent(content) {
     const matches = [
-        ...new Set(content.match(/\([A-Za-z]+[\s]*[0-9+\.*]+\)/g) || []),
+        ...new Set(content.match(/[A-Za-z]{2,4}\s[0-9.*]+/g) || []),
     ];
     for (const m of matches) {
         content = content.replaceAll(
@@ -88,7 +89,7 @@ function parseContent(content) {
 }
 
 function formatMatch(m) {
-    return m.replaceAll(/[\(\s\)]/g, "").toLowerCase();
+    return m.replaceAll(" ", "").toLowerCase();
 }
 
 export { readStream };
