@@ -15,6 +15,7 @@ async function getSutta() {
     text
         ? formatText({ data: text, authorName })
         : legacyText && formatLegacyText({ data: legacyText, authorName });
+    (text || legacyText) && appendPrevAndNextBtns({ uid, author });
 }
 
 /* GET UID */
@@ -93,6 +94,32 @@ async function fetchText({ uid, author }) {
     url = `https://suttacentral.net/api/suttas/${uid}/${author}`;
     const legacyText = (await fetcher(url)).root_text.text;
     return { legacyText };
+}
+
+function appendPrevAndNextBtns({ uid, author }) {
+    const prevAndNextElems = [...document.querySelectorAll(".prev-and-next")];
+    prevAndNextElems.forEach((elem) =>
+        buildPrevAndNextBtns({ uid, author, elem })
+    );
+}
+
+function buildPrevAndNextBtns({ uid, author, elem }) {
+    const prevBtn = document.createElement("button"),
+        nextBtn = document.createElement("button"),
+        uidKeys = Object.keys(uids),
+        index = uidKeys.indexOf(uid),
+        prevIndex = index - 1 >= 0 ? index - 1 : uidKeys.length,
+        nextIndex = index + 1 < uidKeys.length ? index + 1 : 0;
+    prevBtn.textContent = "< previous";
+    nextBtn.textContent = "next >";
+    setClickHandler({ elem: prevBtn, uid: uidKeys[prevIndex], author });
+    setClickHandler({ elem: nextBtn, uid: uidKeys[nextIndex], author });
+    elem.append(prevBtn, nextBtn);
+}
+
+function setClickHandler({ elem, uid, author }) {
+    elem.onclick = () =>
+        (window.location.href = `?uid=${uid}&author=${author}`);
 }
 
 export default getSutta;

@@ -36,7 +36,7 @@ function formatLegacyText({ data, authorName }) {
     const div = document.createElement("div");
     div.innerHTML = data;
     const title = getLegacyTitle({ div, authorName }),
-        sutta = getLegacySutta(div);
+        sutta = getLegacySutta({ div, authorName });
     document.querySelector("#title").innerHTML = title;
     document.querySelector("#sutta").innerHTML = sutta;
 }
@@ -57,37 +57,46 @@ function getLegacyTitle({ div, authorName }) {
     `;
 }
 
-function getLegacySutta(div) {
+function getLegacySutta({ div, authorName }) {
     const paragraphs = [...div.querySelectorAll("p")],
-        copyrightIndex = removeLinksFromParagraphs(paragraphs);
+        copyrightIndex = removeLinksFromParagraphs({ paragraphs, authorName });
     return paragraphs
         .map(
             (p, i) =>
-                `<p${i >= copyrightIndex ? ' class="copyright"' : ""}>${
-                    p.innerHTML
-                }</p>`
+                `<p${
+                    copyrightIndex && i >= copyrightIndex
+                        ? ' class="copyright"'
+                        : ""
+                }>${p.innerHTML}</p>`
         )
         .join("");
 }
 
-function removeLinksFromParagraphs(paragraphs) {
-    const copyrightIndex = getCopyrightIndex(paragraphs);
-    paragraphs.forEach((p, i) => {
-        if (i < copyrightIndex) {
-            // remove all links above copyright
-            [...p.querySelectorAll("a")].forEach((link) => link.remove());
-        }
-    });
+function removeLinksFromParagraphs({ paragraphs, authorName }) {
+    const copyrightIndex = getCopyrightIndex({ paragraphs, authorName });
+    copyrightIndex &&
+        paragraphs.forEach((p, i) => {
+            if (i < copyrightIndex) {
+                // remove all links above copyright
+                [...p.querySelectorAll("a")].forEach((link) => link.remove());
+            }
+        });
     return copyrightIndex;
 }
 
-function getCopyrightIndex(paragraphs) {
+function getCopyrightIndex({ paragraphs, authorName }) {
+    const targets = ["©", authorName, "translated", "translation", "published"];
     for (let i = 0; i < paragraphs.length; i++) {
-        if (paragraphs[i].innerHTML.includes("©")) {
+        const foundIt = targets.find((text, n) => {
+            const html = paragraphs[i].innerHTML,
+                check = n < 2 ? html : html.toLowerCase();
+            return check.includes(text);
+        });
+        if (foundIt) {
             return i;
         }
     }
-    return -1;
+    return null;
 }
 
 export { formatText, formatLegacyText };

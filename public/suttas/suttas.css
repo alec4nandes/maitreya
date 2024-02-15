@@ -14,6 +14,13 @@ form#pick-sutta {
     gap: 8px;
 }
 
+.prev-and-next {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 30px 8px 10px;
+}
+
 #sutta {
     max-width: 650px;
     width: fit-content;
