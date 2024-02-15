@@ -40,11 +40,15 @@ function getData(prompt) {
         "Find the IDs of all suttas that relate to each prompt, " +
         "then format them according to these rules: " +
         "1. Remove all spaces. " +
-        "2. Change all letters to lowercase. " +
-        '3. If the ID is for Dhammapada text, use the abbreviation "dhp". ' +
-        "After formatting the ID, follow it with a colon and a brief summary " +
-        "of the sutta that doesn't contain any direct quotes. " +
-        "The summary should also not mention the ID again.";
+        "2. The first numeric digit must immediately follow a letter. " +
+        "3. Change all letters to lowercase. " +
+        '4. If the ID is for Dhammapada text, use the abbreviation "dhp". ' +
+        "You absolutely must follow the above formatting rules. " +
+        "You also must follow these next rules: " +
+        "1. Write a separate paragraph for each newly formatted ID. " +
+        "2. Start the paragraph with the formatted ID, followed by a colon. " +
+        "3. Write a brief summary of the sutta that doesn't contain any " +
+        "direct quotes. The summary also must not mention the ID again.";
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -57,7 +61,7 @@ function getData(prompt) {
                 content: prompt,
             },
         ],
-        temperature: 0.6,
+        temperature: 0.4,
         apiKeyName: "OPENAI_API_KEY_MAITREYA",
     };
 }

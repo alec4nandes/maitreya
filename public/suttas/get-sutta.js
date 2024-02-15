@@ -51,7 +51,9 @@ async function getSuttaplexUid(uid) {
         url = `${prefix}${uid}`;
         ({ suttaplex } = await fetcher(url));
         if (!suttaplex?.uid) {
-            uid = uid.split(".")[0];
+            const arr = uid.split(".");
+            arr.pop();
+            uid = arr.join(".");
             url = `${prefix}${uid}`;
             ({ suttaplex } = await fetcher(url));
         }
@@ -108,7 +110,7 @@ function buildPrevAndNextBtns({ uid, author, elem }) {
         nextBtn = document.createElement("button"),
         uidKeys = Object.keys(uids),
         index = uidKeys.indexOf(uid),
-        prevIndex = index - 1 >= 0 ? index - 1 : uidKeys.length,
+        prevIndex = index - 1 >= 0 ? index - 1 : uidKeys.length - 1,
         nextIndex = index + 1 < uidKeys.length ? index + 1 : 0;
     prevBtn.textContent = "< previous";
     nextBtn.textContent = "next >";
