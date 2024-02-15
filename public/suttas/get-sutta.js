@@ -1,32 +1,23 @@
+import uids, { authors as authorsInfo } from "./uids.js";
 import { getSelect, addOptions } from "./selects.js";
+import { formatText, formatLegacyText } from "./format-sutta.js";
 
 async function getSutta() {
-    const { uid, authors, author: authorParam } = await getUID();
+    const { uid, authors, authorParam } = await getUID();
     if (!uid) {
         return;
     }
-    const authorUids = Object.keys(authors),
-        author = authorParam || getRandom(authorUids),
-        selectAuthor = getSelect("author"),
-        selectUid = getSelect("uid");
-    if (!authorParam) {
-        const newUrl = window.location.href + `&author=${author}`;
-        window.history.pushState({ path: newUrl }, "", newUrl);
-    }
-    addOptions(selectAuthor, authorUids, true);
-    selectAuthor.value = author;
-    selectUid.value = uid;
-    let url = `https://suttacentral.net/api/bilarasuttas/${uid}/${author}`,
-        { translation_text: text } = await fetcher(url);
-    if (text) {
-        formatText(text, authors[author]);
-    } else {
-        // is "legacy text"
-        url = `https://suttacentral.net/api/suttas/${uid}/${author}`;
-        const { text } = (await fetcher(url)).root_text || {};
-        text && formatLegacyText(text, authors[author]);
-    }
+    const author = authorParam || getRandom(authors);
+    updateUrl({ authorParam, author });
+    changeSelects({ uid, authors, author });
+    const { text, legacyText } = await fetchText({ uid, author }),
+        authorName = authorsInfo[author];
+    text
+        ? formatText({ data: text, authorName })
+        : legacyText && formatLegacyText({ data: legacyText, authorName });
 }
+
+/* GET UID */
 
 async function getUID() {
     const uid = getSearchParam("uid"),
@@ -34,28 +25,15 @@ async function getUID() {
     if (!uid) {
         return { uid: null };
     }
-    try {
-        const prefix = "https://suttacentral.net/api/suttas/";
-        let url = `${prefix}${uid}`,
-            { suttaplex } = await fetcher(url);
-        if (!suttaplex?.uid) {
-            url = `${prefix}${uid.split("-")[0].split(".")[0]}`;
-            ({ suttaplex } = await fetcher(url));
-            console.log(url);
-        }
-        const authors = getAuthors(suttaplex),
-            authorUids = Object.keys(authors);
-        return authorUids.length
-            ? {
-                  uid: suttaplex.uid,
-                  authors,
-                  author: authorUids.includes(author) && author,
-              }
-            : { uid: null };
-    } catch (err) {
-        console.error(err);
-        return { uid: null };
-    }
+    const suttaplexUid = await getSuttaplexUid(uid),
+        authorUids = uids[suttaplexUid];
+    return authorUids
+        ? {
+              uid: suttaplexUid,
+              authors: authorUids,
+              authorParam: authorUids.includes(author) && author,
+          }
+        : { uid: null };
 }
 
 function getSearchParam(param) {
@@ -63,86 +41,58 @@ function getSearchParam(param) {
     return params.get(param);
 }
 
-function getAuthors(suttaplex) {
-    return suttaplex.translations
-        .filter(({ lang }) => lang === "en")
-        .reduce(
-            (acc, { author_uid, author }) => ({
-                ...acc,
-                [author_uid]: author,
-            }),
-            {}
-        );
-}
-
-function getRandom(arr) {
-    return arr[~~(Math.random() * arr.length)];
+async function getSuttaplexUid(uid) {
+    const prefix = "https://suttacentral.net/api/suttas/";
+    let url = `${prefix}${uid}`,
+        { suttaplex } = await fetcher(url);
+    if (!suttaplex?.uid) {
+        uid = uid.split("-")[0];
+        url = `${prefix}${uid}`;
+        ({ suttaplex } = await fetcher(url));
+        if (!suttaplex?.uid) {
+            uid = uid.split(".")[0];
+            url = `${prefix}${uid}`;
+            ({ suttaplex } = await fetcher(url));
+        }
+    }
+    return suttaplex?.uid;
 }
 
 async function fetcher(url) {
     return await (await fetch(url)).json();
 }
 
-function formatText(data, authorName) {
-    const keys = Object.keys(data),
-        titleKeys = keys.filter(
-            (key) => key.split(":")[1].split(".")[0] === "0"
-        ),
-        title = titleKeys.map((key) => {
-            const result = data[key];
-            delete data[key];
-            return result;
-        }),
-        header =
-            title.map((line, i) => `<h${i + 2}>${line}</h${i + 2}>`).join("") +
-            `<em>by ${authorName}</em>`,
-        table = `
-                <table>
-                    ${Object.entries(data)
-                        .map(
-                            ([key, line]) =>
-                                `<tr><td>${key}</td><td>${line}</td></tr>`
-                        )
-                        .join("")}
-                </table>
-            `;
-    document.querySelector("#title").innerHTML = header;
-    document.querySelector("#sutta").innerHTML = table;
+/* END GET UID */
+
+function getRandom(arr) {
+    return arr[~~(Math.random() * arr.length)];
 }
 
-function formatLegacyText(data, authorName) {
-    const div = document.createElement("div");
-    div.innerHTML = data;
-    const h1 = div.querySelector("h1"),
-        title =
-            [h1, ...(div.querySelector("ul")?.querySelectorAll("li") || [])]
-                .map((line) => line.innerHTML?.trim())
-                .map((line, i) => `<h${i + 2}>${line}</h${i + 2}>`)
-                .join("") + `<em>by ${authorName}</em>`,
-        lines = [...div.querySelectorAll("p")],
-        copyrightIndex = getCopyrightIndex(lines),
-        formattedLines = lines
-            .map((line, i) => {
-                if (i < copyrightIndex) {
-                    // remove all links
-                    [...line.querySelectorAll("a")].forEach((link) =>
-                        link.remove()
-                    );
-                }
-                return `<p>${line.innerHTML}</p>`;
-            })
-            .join("");
-    document.querySelector("#title").innerHTML = title;
-    document.querySelector("#sutta").innerHTML = formattedLines;
-}
-
-function getCopyrightIndex(lines) {
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].innerHTML.includes("©")) {
-            return i;
-        }
+function updateUrl({ authorParam, author }) {
+    if (!authorParam) {
+        const newUrl = window.location.href + `&author=${author}`;
+        window.history.pushState({ path: newUrl }, "", newUrl);
     }
-    return -1;
+}
+
+function changeSelects({ uid, authors, author }) {
+    const selectUid = getSelect("uid"),
+        selectAuthor = getSelect("author");
+    selectUid.value = uid;
+    addOptions({ elem: selectAuthor, arr: authors, showName: true });
+    selectAuthor.value = author;
+}
+
+async function fetchText({ uid, author }) {
+    let url = `https://suttacentral.net/api/bilarasuttas/${uid}/${author}`;
+    const text = (await fetcher(url)).translation_text;
+    if (text) {
+        return { text };
+    }
+    // or else it's "legacy text"
+    url = `https://suttacentral.net/api/suttas/${uid}/${author}`;
+    const legacyText = (await fetcher(url)).root_text.text;
+    return { legacyText };
 }
 
 export default getSutta;

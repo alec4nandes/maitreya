@@ -85,7 +85,7 @@ function parseContent(content) {
 }
 
 function formatMatch(m) {
-    return m.replaceAll(" ", "").toLowerCase();
+    return m.toLowerCase();
 }
 
 export { readStream };

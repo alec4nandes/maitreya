@@ -6,15 +6,15 @@ function buildSelects() {
         uidKeys = Object.keys(uids),
         firstKey = uidKeys[0],
         authors = uids[firstKey];
-    addOptions(selectUid, uidKeys);
+    addOptions({ elem: selectUid, arr: uidKeys, showName: false });
     selectUid.value = firstKey;
-    addOptions(selectAuthor, authors, true);
+    addOptions({ elem: selectAuthor, arr: authors, showName: true });
     selectAuthor.value = authors[0];
     selectUid.onchange = (e) => {
         const uid = e.target.value,
             newAuthors = uids[uid],
             currentAuthor = selectAuthor.value;
-        addOptions(selectAuthor, newAuthors, true);
+        addOptions({ elem: selectAuthor, arr: newAuthors, showName: true });
         selectAuthor.value = newAuthors.includes(currentAuthor)
             ? currentAuthor
             : newAuthors[0];
@@ -25,13 +25,19 @@ function getSelect(name) {
     return document.querySelector(`select[name="${name}"]`);
 }
 
-function addOptions(selectElem, arr, showName) {
-    selectElem.innerHTML = arr
+function addOptions({ elem, arr, showName }) {
+    const names =
+        showName &&
+        arr.reduce(
+            (acc, author) => ({ ...acc, [authors[author]]: author }),
+            {}
+        );
+    elem.innerHTML = (names ? Object.keys(names).sort() : arr)
         .map(
             (value) =>
-                `<option value="${value}">${
-                    showName ? authors[value] : value
-                }</option>`
+                `<option value="${
+                    names ? names[value] : value
+                }">${value}</option>`
         )
         .join("");
 }
