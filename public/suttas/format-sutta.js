@@ -58,9 +58,16 @@ function getLegacyTitle({ div, authorName }) {
 }
 
 function getLegacySutta(div) {
-    const paragraphs = [...div.querySelectorAll("p")];
-    removeLinksFromParagraphs(paragraphs);
-    return paragraphs.map((p) => `<p>${p.innerHTML}</p>`).join("");
+    const paragraphs = [...div.querySelectorAll("p")],
+        copyrightIndex = removeLinksFromParagraphs(paragraphs);
+    return paragraphs
+        .map(
+            (p, i) =>
+                `<p${i >= copyrightIndex ? ' class="copyright"' : ""}>${
+                    p.innerHTML
+                }</p>`
+        )
+        .join("");
 }
 
 function removeLinksFromParagraphs(paragraphs) {
@@ -71,6 +78,7 @@ function removeLinksFromParagraphs(paragraphs) {
             [...p.querySelectorAll("a")].forEach((link) => link.remove());
         }
     });
+    return copyrightIndex;
 }
 
 function getCopyrightIndex(paragraphs) {
