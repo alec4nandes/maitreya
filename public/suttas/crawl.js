@@ -13,23 +13,18 @@ const fs = require("fs");
 crawl();
 
 async function crawl() {
-    const abbvs = await getAbbreviations();
     let authors = {},
         result = {};
-    for (const abbv of abbvs) {
-        result = { ...result, ...(await getChapter(abbv, authors)) };
+    for (const chapter of await getAbbreviations()) {
+        await getChapter({ chapter, authors, result });
     }
     authors = sortObject(authors);
     result = sortObject(result);
-    const str = `
-            const uids = ${JSON.stringify(result)};
-            
-            const authors = ${JSON.stringify(authors)};
-            
-            export default uids;
-            export { authors };
-        `;
-    fs.writeFile("uids.js", str, function () {});
+    fs.writeFile(
+        "uids.js",
+        formatFileText({ result, authors }),
+        function () {}
+    );
 }
 
 async function getAbbreviations() {
@@ -42,13 +37,10 @@ async function fetcher(url) {
     return await (await fetch(url)).json();
 }
 
-async function getChapter(chapter, authors) {
+async function getChapter({ chapter, authors, result }) {
     const url = `https://suttacentral.net/api/suttaplex/${chapter}`,
         data = await fetcher(url),
-        uids = data.filter(
-            ({ uid }) => uid && [...uid].find((char) => !isNaN(char))
-        ),
-        result = {};
+        uids = data.filter(({ uid }) => uidHasNumber(uid));
     for (const { uid, translations } of uids) {
         const english = translations
             .filter(
@@ -63,7 +55,10 @@ async function getChapter(chapter, authors) {
             result[uid] = english;
         }
     }
-    return result;
+}
+
+function uidHasNumber(uid) {
+    return uid && [...uid].find((char) => !isNaN(char));
 }
 
 function sortObject(obj) {
@@ -103,4 +98,15 @@ function getFirstNumIndex(uid) {
             return i;
         }
     }
+}
+
+function formatFileText({ result, authors }) {
+    return `
+        const uids = ${JSON.stringify(result)};
+        
+        const authors = ${JSON.stringify(authors)};
+        
+        export default uids;
+        export { authors };
+    `;
 }
