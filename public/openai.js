@@ -1,7 +1,5 @@
 import getValidUIDs, { MAX_SUTTAS } from "./validate-uids.js";
 
-const regExp = new RegExp(/[A-Za-z]{2,4}[0-9]+[\.0-9\-]*/g);
-
 /*
     1. Get valid sutta IDs
     2. If no valid UIDs, show generic message
@@ -97,7 +95,8 @@ async function fetchStream(params) {
 }
 
 function parseContent(content) {
-    const matches = [...new Set(content.match(regExp) || [])];
+    const regExp = new RegExp(/[A-Za-z]{2,4}[0-9]+[\.0-9\-]*/g),
+        matches = [...new Set(content.match(regExp) || [])];
     for (const m of matches) {
         content = content.replaceAll(
             m,
