@@ -26,7 +26,7 @@ async function getUID() {
     if (!uid) {
         return { uid: null };
     }
-    const suttaplexUid = await getSuttaplexUid(uid),
+    const { uid: suttaplexUid } = await getSuttaplexUid(uid),
         authorUids = uids[suttaplexUid];
     return authorUids
         ? {
@@ -47,18 +47,26 @@ async function getSuttaplexUid(uid) {
     let url = `${prefix}${uid}`,
         { suttaplex } = await fetcher(url);
     if (!suttaplex?.uid) {
+        // if range, get first part
         uid = uid.split("-")[0];
         url = `${prefix}${uid}`;
         ({ suttaplex } = await fetcher(url));
         if (!suttaplex?.uid) {
+            // if more than 2 subsections, pop off last
             const arr = uid.split(".");
             arr.pop();
             uid = arr.join(".");
-            url = `${prefix}${uid}`;
-            ({ suttaplex } = await fetcher(url));
+            if (uid) {
+                url = `${prefix}${uid}`;
+                ({ suttaplex } = await fetcher(url));
+            }
         }
     }
-    return suttaplex?.uid;
+    const uidKeys = Object.keys(uids);
+    return {
+        uid: uidKeys.includes(suttaplex?.uid) && suttaplex.uid,
+        blurb: suttaplex?.blurb,
+    };
 }
 
 async function fetcher(url) {
@@ -125,4 +133,4 @@ function setClickHandler({ elem, uid, author }) {
 }
 
 export default getSutta;
-export { getRandom };
+export { getRandom, getSuttaplexUid };

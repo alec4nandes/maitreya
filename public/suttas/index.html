@@ -8,22 +8,24 @@
         <title>Suttas &mdash; Maitreya</title>
     </head>
     <body>
-        <h1>Suttas</h1>
-        <nav>
-            <a href="/">Home</a>
+        <main>
+            <h1>Suttas</h1>
+            <nav>
+                <a href="/">Home</a>
             &nbsp; | &nbsp;
             <a href="" id="random">Random Sutta</a>
-        </nav>
-        <form id="pick-sutta">
-            <select name="uid"></select>
-            by
-            <select name="author"></select>
-            <button type="submit">look up</button>
-        </form>
-        <div class="prev-and-next"></div>
-        <div id="title"></div>
-        <div id="sutta"></div>
-        <div class="prev-and-next"></div>
+            </nav>
+            <form id="pick-sutta">
+                <select name="uid"></select>
+                by
+                <select name="author"></select>
+                <button type="submit">look up</button>
+            </form>
+            <div class="prev-and-next"></div>
+            <div id="title"></div>
+            <div id="sutta"></div>
+            <div class="prev-and-next"></div>
+        </main>
 
         <script type="module">
             import buildSelects from "./selects.js";

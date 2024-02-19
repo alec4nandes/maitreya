@@ -1,5 +1,6 @@
 :root {
     --accent-1: #413c58;
+    --accent-1a: #4c417b;
     --accent-2: #d1ede6;
     --accent-3: #e7efc5;
     --accent-4: #fffcf2;
@@ -17,7 +18,7 @@ a {
 body {
     background-color: var(--accent-1);
     color: var(--accent-4);
-    margin: 50px 15px;
+    margin: 0;
 }
 
 body,
@@ -70,6 +71,33 @@ select {
     }
 }
 
+footer {
+    background-color: var(--accent-1a);
+    display: none;
+
+    & h2 {
+        text-align: center;
+    }
+
+    & ul {
+        margin: auto;
+
+        & li {
+            margin-bottom: 15px;
+        }
+    }
+}
+
+footer,
+main {
+    padding: 50px 15px;
+}
+
+footer ul,
+#response {
+    max-width: 600px;
+}
+
 form#ask {
     max-width: 400px;
     width: 100%;
@@ -104,8 +132,6 @@ nav {
 }
 
 #response {
-    max-width: 600px;
-    width: 100%;
     margin: 30px auto 0;
     white-space: break-spaces;
 }
