@@ -1,6 +1,7 @@
+import { formatText, formatLegacyText } from "./format-sutta.js";
+import { fetchSuttaplexUID, fetcher } from "../validate-uids.js";
 import uids, { authors as authorsInfo } from "./uids.js";
 import { getSelect, addOptions } from "./selects.js";
-import { formatText, formatLegacyText } from "./format-sutta.js";
 
 async function getSutta() {
     const { uid, authors, authorParam } = await getUID();
@@ -26,7 +27,7 @@ async function getUID() {
     if (!uid) {
         return { uid: null };
     }
-    const { uid: suttaplexUid } = await getSuttaplexUid(uid),
+    const { uid: suttaplexUid } = await fetchSuttaplexUID(uid),
         authorUids = uids[suttaplexUid];
     return authorUids
         ? {
@@ -40,37 +41,6 @@ async function getUID() {
 function getSearchParam(param) {
     const params = new URL(document.location).searchParams;
     return params.get(param);
-}
-
-async function getSuttaplexUid(uid) {
-    const prefix = "https://suttacentral.net/api/suttas/";
-    let url = `${prefix}${uid}`,
-        { suttaplex } = await fetcher(url);
-    if (!suttaplex?.uid) {
-        // if range, get first part
-        uid = uid.split("-")[0];
-        url = `${prefix}${uid}`;
-        ({ suttaplex } = await fetcher(url));
-        if (!suttaplex?.uid) {
-            // if more than 2 subsections, pop off last
-            const arr = uid.split(".");
-            arr.pop();
-            uid = arr.join(".");
-            if (uid) {
-                url = `${prefix}${uid}`;
-                ({ suttaplex } = await fetcher(url));
-            }
-        }
-    }
-    const uidKeys = Object.keys(uids);
-    return {
-        uid: uidKeys.includes(suttaplex?.uid) && suttaplex.uid,
-        blurb: suttaplex?.blurb,
-    };
-}
-
-async function fetcher(url) {
-    return await (await fetch(url)).json();
 }
 
 /* END GET UID */
@@ -133,4 +103,4 @@ function setClickHandler({ elem, uid, author }) {
 }
 
 export default getSutta;
-export { getRandom, getSuttaplexUid };
+export { getRandom };

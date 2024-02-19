@@ -1,114 +1,29 @@
-import { getSuttaplexUid } from "./suttas/get-sutta.js";
+import getValidUIDs, { MAX_SUTTAS } from "./validate-uids.js";
 
-const MAX_SUTTAS = 3,
-    regExp = new RegExp(/[A-Za-z]{2,4}[0-9]+[\.0-9\-]*/g);
+const regExp = new RegExp(/[A-Za-z]{2,4}[0-9]+[\.0-9\-]*/g);
 
 /*
-    1. Get sutta IDs as CSV
-    2. Split CSV, and map out valid UIDs
-    3. Filter out null values
-    4. If no values, show generic message
-    5. Call OpenAI again with the prompt + a list of valid UIDs
+    1. Get valid sutta IDs
+    2. If no valid UIDs, show generic message
+    3. Call OpenAI API with the prompt and list of valid UIDs
 */
 
-// STEPS 1-3
-
-async function getUIDs(prompt) {
-    try {
-        const uids = await getOpenAiUIDs(prompt),
-            validUIDs = await getValidUIDs(uids);
-        console.log(validUIDs);
-        return validUIDs;
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-async function getOpenAiUIDs(prompt) {
-    const response = await fetch(
-            "https://nsr23vt5ps2kdjj2ypy2ypvlpe0oxnqb.lambda-url.us-east-2.on.aws/",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(getDataForUIDs(prompt)),
-            }
-        ),
-        { choices } = await response.json(),
-        result = choices[0].message.content;
-    return result
-        .split(",")
-        .map((uid) => uid.trim())
-        .filter(Boolean);
-}
-
-function getDataForUIDs(prompt) {
-    const systemContent =
-        "Respond only with a comma-separated list of Buddhist sutta IDs " +
-        "that relate to each prompt. " +
-        "Order the list from most relevant to least relevant " +
-        `with no more than ${MAX_SUTTAS} IDs. ` +
-        "Every Buddhist sutta has a unique abbreviated ID. " +
-        "Format each one according to these rules: " +
-        "1. Remove all spaces. " +
-        "2. The first numeric digit must immediately follow a letter. " +
-        "3. Change all letters to lowercase. " +
-        '4. If the ID is for Dhammapada text, use the abbreviation "dhp".';
-    return {
-        model: "gpt-3.5-turbo",
-        messages: [
-            {
-                role: "system",
-                content: systemContent,
-            },
-            {
-                role: "user",
-                content: prompt,
-            },
-        ],
-        apiKeyName: "OPENAI_API_KEY_MAITREYA",
-    };
-}
-
-async function getValidUIDs(uids) {
-    const result = {};
-    for (const uid of uids) {
-        try {
-            result[uid] = await getSuttaplexUid(uid);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-    return result;
-}
-
-// STEPS 4-5
-
-async function readStream({ event, summaryElem, responseElem, level = 0 }) {
+async function readStream({ event, summaryElem, responseElem }) {
     try {
         event.preventDefault();
         summaryElem.style.display = "none";
         responseElem.style.textAlign = "center";
         responseElem.textContent = "Asking...";
         const prompt = event.target.prompt.value.trim(),
-            uids = await getUIDs(prompt),
-            data = getData({ uids, prompt });
-        if (!data) {
-            if (level > 2) {
-                responseElem.textContent =
-                    "There are no valid suttas that match your question. " +
-                    "Please ask something else.";
-                return;
-            } else {
-                readStream({
-                    event,
-                    summaryElem,
-                    responseElem,
-                    level: level + 1,
-                });
-                return;
-            }
+            uids = await getValidUIDs({ prompt });
+        if (!uids) {
+            responseElem.textContent =
+                "There are no valid suttas that match your question. " +
+                "Please ask something else.";
+            return;
         }
-        const stream = await fetchStream(data),
+        const params = getParamsForOpenAi({ uids, prompt }),
+            stream = await fetchStream(params),
             reader = stream.getReader();
         // read() returns a promise that fulfills
         // when a value has been received
@@ -121,7 +36,7 @@ async function readStream({ event, summaryElem, responseElem, level = 0 }) {
             if (done) {
                 console.log("Stream complete!");
                 responseElem.innerHTML = parseContent(responseElem.textContent);
-                showSummary({ summaryElem, uids });
+                showSummary({ uids, summaryElem });
             } else {
                 const decoded = new TextDecoder().decode(value);
                 responseElem.textContent += decoded;
@@ -134,13 +49,7 @@ async function readStream({ event, summaryElem, responseElem, level = 0 }) {
     }
 }
 
-function getData({ uids, prompt }) {
-    for (const uid of Object.keys(uids)) {
-        !uids[uid].uid && delete uids[uid];
-    }
-    if (!Object.entries(uids).length) {
-        return null;
-    }
+function getParamsForOpenAi({ uids, prompt }) {
     const systemContent =
         "You are the next Buddha named Maitreya. " +
         "You give advice based on Buddhist suttas. " +
@@ -163,10 +72,9 @@ function getData({ uids, prompt }) {
 }
 
 function getPrompt({ uids, prompt }) {
-    const uniqueUIDs = [...new Set(Object.values(uids).map(({ uid }) => uid))];
     return (
         "Here are a list of sutta IDs: " +
-        uniqueUIDs.join(", ") +
+        Object.keys(uids).join(", ") +
         ". Do not expand on a hypenated range of verses, for example dhp1-20. " +
         "Treat them as a single unit. " +
         "Write a separate paragraph for each ID that begins with the ID " +
@@ -176,13 +84,13 @@ function getPrompt({ uids, prompt }) {
     );
 }
 
-async function fetchStream(data) {
+async function fetchStream(params) {
     const response = await fetch(
         "https://uf663xchsyh44bikbn723q7ewq0xqoaz.lambda-url.us-east-2.on.aws/",
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify(params),
         }
     );
     return response.body;
@@ -205,30 +113,26 @@ function formatMatch(m) {
     return m.toLowerCase();
 }
 
-function showSummary({ summaryElem, uids }) {
-    const noRepeats = Object.values(uids).reduce(
-        (acc, { uid, blurb }) => (uid in acc ? acc : { ...acc, [uid]: blurb }),
-        {}
-    );
+function showSummary({ uids, summaryElem }) {
+    const listItems = Object.entries(uids)
+        .map(
+            ([uid, blurb]) => `
+                <li>
+                    <strong>
+                        <a
+                            href="/suttas/?uid=${uid}"
+                            target="_blank"
+                            rel="noopener"
+                        >${uid}</a>${blurb ? ":" : ""}
+                    </strong>
+                    ${blurb || ""}
+                </li>`
+        )
+        .join("");
     summaryElem.innerHTML = `
         <h2>References</h2>
-        <ul>
-            ${Object.entries(noRepeats)
-                .map(
-                    ([uid, blurb]) => `
-                    <li>
-                        <strong>
-                            <a
-                                href="/suttas/?uid=${uid}"
-                                target="_blank"
-                                rel="noopener">${uid}</a>${blurb ? ":" : ""}
-                        </strong>
-                        ${blurb || ""}
-                    </li>`
-                )
-                .join("")}
-        </ul>`;
+        <ul>${listItems}</ul>`;
     summaryElem.style.display = "block";
 }
 
-export { getUIDs, readStream };
+export default readStream;

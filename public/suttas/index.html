@@ -33,11 +33,10 @@
             import uids from "./uids.js";
             buildSelects();
             getSutta();
-            const randomUid = getRandom(Object.keys(uids)),
+            const randomLink = document.querySelector("#random"),
+                randomUid = getRandom(Object.keys(uids)),
                 randomAuthor = getRandom(uids[randomUid]);
-            document
-                .querySelector("#random")
-                .href = `?uid=${randomUid}&author=${randomAuthor}`;
+            randomLink.href = `?uid=${randomUid}&author=${randomAuthor}`;
         </script>
     </body>
 </html>
