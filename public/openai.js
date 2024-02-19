@@ -170,8 +170,8 @@ function getPrompt({ uids, prompt }) {
         ". Do not expand on a hypenated range of verses, for example dhp1-20. " +
         "Treat them as a single unit. " +
         "Write a separate paragraph for each ID that begins with the ID " +
-        "followed by a colon. After the colon, explain how each sutta ID " +
-        "relates to the following prompt: " +
+        "followed by a colon. After the colon, without mentioning the ID again, " +
+        "explain how each sutta ID relates to the following prompt: " +
         prompt
     );
 }
