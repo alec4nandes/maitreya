@@ -3,14 +3,17 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, user-scalable=no">
-        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/css/style.css">
         <title>Maitreya</title>
+        <script src="/scripts/auth.js"></script>
     </head>
     <body>
-        <main>
+        <main style="display: none;">
             <h1>Maitreya</h1>
             <nav>
                 <a href="/suttas">Suttas</a>
+                &nbsp;|&nbsp;
+                <button id="sign-out">Sign Out</button>
             </nav>
             <form id="ask">
                 <textarea name="prompt" maxlength="200"></textarea>
@@ -27,5 +30,6 @@
                 responseElem = document.querySelector("#response");
             formElem.onsubmit = (event) => readStream({event, summaryElem, responseElem});
         </script>
+        <script src="/scripts/sign-out.js"></script>
     </body>
 </html>

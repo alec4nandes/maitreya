@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="/css/sign-in.css">
+        <title>Maitreya &mdash; Verify Email</title>
+        <script src="/scripts/auth.js"></script>
+    </head>
+    <body>
+        <main style="display: none;">
+            <h1>Maitreya</h1>
+            <h2>Verify Email</h2>
+            <p>The email address for this account is not verified. Please click the link in your email.</p>
+            <button id="resend-verify">resend verification link</button>
+            <button onclick="window.location.reload()">refresh page</button>
+            <button id="sign-out">sign out</button>
+        </main>
+
+        <script src="/scripts/verify.js"></script>
+        <script src="/scripts/sign-out.js"></script>
+    </body>
+</html>

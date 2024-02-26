@@ -1,0 +1,15 @@
+body {
+    text-align: center;
+}
+
+form {
+    & table {
+        margin: 30px auto;
+
+        & tr:not(:last-child) {
+            & td:first-child {
+                text-align: right;
+            }
+        }
+    }
+}

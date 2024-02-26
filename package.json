@@ -6,6 +6,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "firebase": "firebase serve --port 9271 --only hosting",
+        "build": "webpack",
+        "watch": "webpack --watch",
         "deploy": "deploy.bat"
     },
     "keywords": [],
@@ -13,5 +15,9 @@
     "license": "ISC",
     "dependencies": {
         "firebase": "^10.7.2"
+    },
+    "devDependencies": {
+        "webpack": "^5.90.3",
+        "webpack-cli": "^5.1.4"
     }
 }
