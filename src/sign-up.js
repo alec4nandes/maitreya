@@ -18,9 +18,14 @@ async function handleSignUp(e) {
         await sendEmailVerification(user, {
             url: "https://maitreya-buddha.web.app/",
         });
-        window.location.href = "/";
     } catch (err) {
         console.error(err);
-        alert(err.message);
+        if (err.message.includes("auth/network-request-failed")) {
+            // set delay on this particular alert
+            // (sometimes it pops up too early and isn't necessary)
+            setTimeout(() => alert(err.message), 1000);
+        } else {
+            alert(err.message);
+        }
     }
 }

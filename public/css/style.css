@@ -6,9 +6,11 @@
     --accent-4: #fffcf2;
 }
 
-a {
+a,
+button.text-button {
     color: var(--accent-3);
     font-weight: bold;
+    text-decoration: underline;
 
     &:hover {
         color: var(--accent-2);
@@ -31,6 +33,7 @@ textarea {
 }
 
 body,
+button.text-button,
 input,
 pre,
 textarea {
@@ -40,9 +43,16 @@ textarea {
 button {
     background-color: var(--accent-2);
     font-weight: bold;
+    padding: 5px 10px;
 
     &:hover {
         background-color: var(--accent-3);
+    }
+
+    &.text-button {
+        min-width: auto;
+        background-color: transparent;
+        padding: 0;
     }
 }
 
@@ -61,7 +71,6 @@ textarea {
     border-radius: 7px;
     box-sizing: border-box;
     color: var(--accent-1);
-    padding: 5px;
 }
 
 button,
@@ -124,6 +133,7 @@ input,
 select,
 textarea {
     background-color: var(--accent-4);
+    padding: 5px;
 }
 
 nav {

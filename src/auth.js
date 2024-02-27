@@ -7,7 +7,7 @@ import { getLastResponse } from "./firestore.js";
 const timeout = setTimeout(() => window.location.reload(true), 2000);
 
 onAuthStateChanged(auth, async (user) => {
-    // auth state has loaded, so cancel refresh
+    // auth state has loaded, so cancel page reload
     clearTimeout(timeout);
     const isSignInPage = window.location.href.includes("sign-in.html"),
         isSignUpPage = window.location.href.includes("sign-up.html"),

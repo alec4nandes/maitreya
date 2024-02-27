@@ -8,7 +8,6 @@ async function handleSignIn(e) {
     const { email, password } = e.target;
     try {
         await signInWithEmailAndPassword(auth, email.value, password.value);
-        window.location.href = "/";
     } catch (err) {
         console.error(err);
         alert(err.message);
