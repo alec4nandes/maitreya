@@ -43,6 +43,7 @@ async function getSavedResponses() {
 
 function formatSavedResponses(saved) {
     const listItems = saved
+        .sort(({ time: a }, { time: b }) => b - a)
         .map(
             ({ time, prompt, uids }) => `
                 <li>
