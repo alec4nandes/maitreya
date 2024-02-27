@@ -50,14 +50,14 @@ function formatSavedResponses(saved) {
 
             const pTime = document.createElement("p");
             pTime.classList.add("time");
-            pTime.textContent = new Date(time).toLocaleString();
+            pTime.textContent = formatTime(time);
             li.appendChild(pTime);
 
             const btn = document.createElement("button");
             btn.classList.add("text-button");
             btn.textContent = prompt;
             btn.onclick = () =>
-                showSavedResponse({ prompt, response, summary });
+                showSavedResponse({ time, prompt, response, summary });
             li.appendChild(btn);
 
             const pUids = document.createElement("p"),
@@ -79,18 +79,40 @@ function formatSavedResponses(saved) {
     return ul;
 }
 
-function showSavedResponse({ prompt, response, summary }) {
+function formatTime(time) {
+    return new Date(time).toLocaleString();
+}
+
+function showSavedResponse({ time, prompt, response, summary }) {
     const saveBtn = document.querySelector("button#save-response"),
         textarea = document.querySelector('textarea[name="prompt"]'),
         responseElem = document.querySelector("#response"),
         summaryElem = document.querySelector("footer"),
         menu = document.querySelector("header#menu");
-    saveBtn.disabled = true;
+    saveBtn.textContent = "delete response";
+    saveBtn.onclick = () => deleteSavedResponse(time);
     textarea.value = prompt;
     responseElem.innerHTML = response;
     summaryElem.innerHTML = summary;
     summaryElem.style.display = "block";
     menu.classList.add("closed");
+}
+
+async function deleteSavedResponse(time) {
+    const proceed = confirm(`Delete response saved on ${formatTime(time)}?`);
+    if (proceed) {
+        try {
+            const docRef = getDocRef(),
+                { saved_responses: saved } = (await getDoc(docRef)).data(),
+                filtered = saved.filter(({ time: t }) => t !== time);
+            await updateDoc(docRef, { saved_responses: filtered });
+            alert("Response deleted!");
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        }
+    }
 }
 
 async function updateResponse({ prompt, response, summary, uids }) {

@@ -47,6 +47,7 @@ async function readStream(event) {
                 showSummary({ summaryElem, summary });
                 const dbParams = { prompt, response, summary, uids };
                 updateResponse(dbParams);
+                saveBtn.textContent = "save response";
                 saveBtn.onclick = () => saveResponse(dbParams);
                 saveBtn.disabled = false;
             } else {
