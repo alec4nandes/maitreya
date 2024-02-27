@@ -152,9 +152,9 @@ header#menu {
     position: fixed;
     top: 0;
     right: clamp(
-        calc(100vw - var(--max-width)),
-        calc(100vw - var(--width)),
-        calc(100vw - var(--min-width))
+        calc(100% - var(--max-width)),
+        calc(100% - var(--width)),
+        calc(100% - var(--min-width))
     );
     text-align: center;
     transition: 1s;
@@ -176,6 +176,29 @@ header#menu {
 
     & h2 {
         margin-top: 40px;
+    }
+
+    & #menu-content ul {
+        box-sizing: border-box;
+        padding: 0 15px;
+
+        & li {
+            list-style-type: none;
+            margin-bottom: 20px;
+
+            & p {
+                margin: 0;
+
+                &.time {
+                    opacity: 0.8;
+                }
+
+                &.time,
+                &.uids {
+                    font-size: 0.8rem;
+                }
+            }
+        }
     }
 }
 

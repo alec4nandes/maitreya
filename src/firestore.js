@@ -27,6 +27,45 @@ async function getLastResponse() {
     }
 }
 
+async function getSavedResponses() {
+    const menuContent = document.querySelector("#menu-content");
+    try {
+        const { saved_responses: saved } = (await getDoc(getDocRef())).data();
+        menuContent.innerHTML += saved?.length
+            ? formatSavedResponses(saved)
+            : "<p><em>No saved responses.</em></p>";
+    } catch (err) {
+        console.error(err);
+        menuContent.innerHTML +=
+            "<p><em>Unable to retrieve saved responses.</em></p>";
+    }
+}
+
+function formatSavedResponses(saved) {
+    const listItems = saved
+        .map(
+            ({ time, prompt, uids }) => `
+                <li>
+                    <p class="time">${new Date(time).toLocaleString()}</p>
+                    <p class="asked">${prompt}</p>
+                    <p class="uids">
+                        ${Object.keys(uids)
+                            .map(
+                                (uid) => `
+                                    <a
+                                        href="/suttas/?uid=${uid}"
+                                        target="_blank"
+                                        rel="noopener">${uid}</a>`
+                            )
+                            .join(", ")}
+                    </p>
+                </li>
+            `
+        )
+        .join("");
+    return `<ul>${listItems}</ul>`;
+}
+
 async function updateResponse({ prompt, response, summary, uids }) {
     try {
         const docRef = getDocRef(),
@@ -55,6 +94,7 @@ async function saveResponse({ prompt, response, summary, uids }) {
             }),
         });
         alert("Response saved!");
+        window.location.reload();
     } catch (err) {
         console.error(err);
         alert(err.message);
@@ -66,4 +106,4 @@ function getDocRef() {
     return docRef;
 }
 
-export { getLastResponse, updateResponse, saveResponse };
+export { getLastResponse, getSavedResponses, updateResponse, saveResponse };

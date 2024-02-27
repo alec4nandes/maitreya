@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./db.js";
-import { getLastResponse } from "./firestore.js";
+import { getLastResponse, getSavedResponses } from "./firestore.js";
 
 // reload page if auth state doesn't load
 // (lags sometimes on mobile, but reload fixes it)
@@ -28,6 +28,7 @@ onAuthStateChanged(auth, async (user) => {
             return;
         }
         await getLastResponse();
+        await getSavedResponses();
     }
     if (!user && !isSignInOrUp) {
         window.location.replace("/sign-in.html");

@@ -2,7 +2,7 @@ const toggleBtns = [...document.querySelectorAll("button.toggle-menu")];
 toggleBtns.forEach((btn) => (btn.onclick = handleToggleMenu));
 
 function handleToggleMenu() {
-    const header = document.querySelector("header"),
-        isClosed = header.classList.contains("closed");
-    header.classList[isClosed ? "remove" : "add"]("closed");
+    const menu = document.querySelector("header#menu"),
+        isClosed = menu.classList.contains("closed");
+    menu.classList[isClosed ? "remove" : "add"]("closed");
 }
