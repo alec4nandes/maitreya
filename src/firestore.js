@@ -31,9 +31,9 @@ async function getSavedResponses() {
     const menuContent = document.querySelector("#menu-content");
     try {
         const { saved_responses: saved } = (await getDoc(getDocRef())).data();
-        menuContent.innerHTML += saved?.length
-            ? formatSavedResponses(saved)
-            : "<p><em>No saved responses.</em></p>";
+        saved?.length
+            ? menuContent.appendChild(formatSavedResponses(saved))
+            : (menuContent.innerHTML = "<p><em>No saved responses.</em></p>");
     } catch (err) {
         console.error(err);
         menuContent.innerHTML +=
@@ -42,29 +42,55 @@ async function getSavedResponses() {
 }
 
 function formatSavedResponses(saved) {
-    const listItems = saved
+    const ul = document.createElement("ul");
+    saved
         .sort(({ time: a }, { time: b }) => b - a)
-        .map(
-            ({ time, prompt, uids }) => `
-                <li>
-                    <p class="time">${new Date(time).toLocaleString()}</p>
-                    <p class="asked">${prompt}</p>
-                    <p class="uids">
-                        ${Object.keys(uids)
-                            .map(
-                                (uid) => `
-                                    <a
-                                        href="/suttas/?uid=${uid}"
-                                        target="_blank"
-                                        rel="noopener">${uid}</a>`
-                            )
-                            .join(", ")}
-                    </p>
-                </li>
-            `
-        )
-        .join("");
-    return `<ul>${listItems}</ul>`;
+        .forEach(({ time, prompt, response, summary, uids }) => {
+            const li = document.createElement("li");
+
+            const pTime = document.createElement("p");
+            pTime.classList.add("time");
+            pTime.textContent = new Date(time).toLocaleString();
+            li.appendChild(pTime);
+
+            const btn = document.createElement("button");
+            btn.classList.add("text-button");
+            btn.textContent = prompt;
+            btn.onclick = () =>
+                showSavedResponse({ prompt, response, summary });
+            li.appendChild(btn);
+
+            const pUids = document.createElement("p"),
+                uidLinks = Object.keys(uids)
+                    .map(
+                        (uid) => `
+                            <a
+                                href="/suttas/?uid=${uid}"
+                                target="_blank"
+                                rel="noopener">${uid}</a>`
+                    )
+                    .join(", ");
+            pUids.classList.add("uids");
+            pUids.innerHTML = uidLinks;
+            li.appendChild(pUids);
+
+            ul.appendChild(li);
+        });
+    return ul;
+}
+
+function showSavedResponse({ prompt, response, summary }) {
+    const saveBtn = document.querySelector("button#save-response"),
+        textarea = document.querySelector('textarea[name="prompt"]'),
+        responseElem = document.querySelector("#response"),
+        summaryElem = document.querySelector("footer"),
+        menu = document.querySelector("header#menu");
+    saveBtn.disabled = true;
+    textarea.value = prompt;
+    responseElem.innerHTML = response;
+    summaryElem.innerHTML = summary;
+    summaryElem.style.display = "block";
+    menu.classList.add("closed");
 }
 
 async function updateResponse({ prompt, response, summary, uids }) {
