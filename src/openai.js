@@ -144,5 +144,3 @@ function getSummary(uids) {
         .join("");
     return `<h2>References</h2><ul>${listItems}</ul>`;
 }
-
-export default readStream;

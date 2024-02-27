@@ -2,7 +2,13 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./db.js";
 import { getLastResponse } from "./firestore.js";
 
+// reload page if auth state doesn't load
+// (lags sometimes on mobile, but reload fixes it)
+const timeout = setTimeout(() => window.location.reload(true), 2000);
+
 onAuthStateChanged(auth, async (user) => {
+    // auth state has loaded, so cancel refresh
+    clearTimeout(timeout);
     const isSignInPage = window.location.href.includes("sign-in.html"),
         isSignUpPage = window.location.href.includes("sign-up.html"),
         isVerifyPage = window.location.href.includes("verify.html"),
