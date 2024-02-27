@@ -49,6 +49,15 @@ button {
         background-color: var(--accent-3);
     }
 
+    &#save-response {
+        display: block;
+        margin: 30px auto auto;
+
+        &:disabled {
+            display: none;
+        }
+    }
+
     &.text-button {
         min-width: auto;
         background-color: transparent;

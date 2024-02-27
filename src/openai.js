@@ -1,5 +1,5 @@
 import getValidUIDs, { MAX_SUTTAS } from "../public/validate-uids.js";
-import { updateResponse } from "./firestore.js";
+import { saveResponse, updateResponse } from "./firestore.js";
 
 /*
     1. Get valid sutta IDs
@@ -13,8 +13,10 @@ formElem.onsubmit = readStream;
 async function readStream(event) {
     try {
         event.preventDefault();
-        const summaryElem = document.querySelector("footer"),
+        const saveBtn = document.querySelector("button#save-response"),
+            summaryElem = document.querySelector("footer"),
             responseElem = document.querySelector("#response");
+        saveBtn.disabled = true;
         summaryElem.style.display = "none";
         responseElem.style.textAlign = "center";
         responseElem.textContent = "Asking...";
@@ -43,7 +45,10 @@ async function readStream(event) {
                     summary = getSummary(uids);
                 responseElem.innerHTML = response;
                 showSummary({ summaryElem, summary });
-                updateResponse({ prompt, response, summary });
+                const dbParams = { prompt, response, summary, uids };
+                updateResponse(dbParams);
+                saveBtn.onclick = () => saveResponse(dbParams);
+                saveBtn.disabled = false;
             } else {
                 const decoded = new TextDecoder().decode(value);
                 responseElem.textContent += decoded;

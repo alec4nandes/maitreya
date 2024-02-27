@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, firestore } from "./db.js";
 
 async function getLastResponse() {
@@ -6,25 +6,55 @@ async function getLastResponse() {
         const textarea = document.querySelector('textarea[name="prompt"]'),
             responseElem = document.querySelector("#response"),
             summaryElem = document.querySelector("footer"),
-            { last_prompt, last_response, last_summary } = (
+            saveBtn = document.querySelector("button#save-response"),
+            { last_prompt, last_response, last_summary, last_uids } = (
                 await getDoc(getDocRef())
             ).data();
         textarea.value = last_prompt;
         responseElem.innerHTML = last_response;
         summaryElem.innerHTML = last_summary;
         summaryElem.style.display = "block";
+        saveBtn.onclick = () =>
+            saveResponse({
+                prompt: last_prompt,
+                response: last_response,
+                summary: last_summary,
+                uids: last_uids,
+            });
+        saveBtn.disabled = false;
     } catch (err) {
         console.error(err.message);
     }
 }
 
-async function updateResponse({ prompt, response, summary }) {
+async function updateResponse({ prompt, response, summary, uids }) {
     try {
-        await setDoc(getDocRef(), {
+        const docRef = getDocRef(),
+            docExists = (await getDoc(docRef)).exists();
+        await (docExists ? updateDoc : setDoc)(getDocRef(), {
             last_prompt: prompt,
             last_response: response,
             last_summary: summary,
+            last_uids: uids,
         });
+    } catch (err) {
+        console.error(err);
+        alert(err.message);
+    }
+}
+
+async function saveResponse({ prompt, response, summary, uids }) {
+    try {
+        await updateDoc(getDocRef(), {
+            saved_responses: arrayUnion({
+                time: new Date().getTime(),
+                prompt,
+                response,
+                summary,
+                uids,
+            }),
+        });
+        alert("Response saved!");
     } catch (err) {
         console.error(err);
         alert(err.message);
@@ -36,4 +66,4 @@ function getDocRef() {
     return docRef;
 }
 
-export { getLastResponse, updateResponse };
+export { getLastResponse, updateResponse, saveResponse };

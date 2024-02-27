@@ -2,11 +2,11 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        // "auth.js": "./src/auth.js",
-        // "openai.js": "./src/openai.js",
-        "sign-in.js": "./src/sign-in.js",
+        "auth.js": "./src/auth.js",
+        "openai.js": "./src/openai.js",
+        // "sign-in.js": "./src/sign-in.js",
         // "sign-out.js": "./src/sign-out.js",
-        "sign-up.js": "./src/sign-up.js",
+        // "sign-up.js": "./src/sign-up.js",
         // "verify.js": "./src/verify.js",
     },
     output: {
