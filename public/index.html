@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, user-scalable=no">
         <link rel="stylesheet" href="/css/style.css">
         <title>Maitreya</title>
-        <script src="/scripts/auth.js"></script>
     </head>
     <body>
         <main style="display: none;">
@@ -23,13 +22,8 @@
         </main>
         <footer></footer>
 
-        <script type="module">
-            import readStream from "./openai.js";
-            const formElem = document.querySelector("form"),
-                summaryElem = document.querySelector("footer"),
-                responseElem = document.querySelector("#response");
-            formElem.onsubmit = (event) => readStream({event, summaryElem, responseElem});
-        </script>
+        <script src="/scripts/auth.js"></script>
+        <script src="/scripts/openai.js"></script>
         <script src="/scripts/sign-out.js"></script>
     </body>
 </html>

@@ -1,4 +1,5 @@
-import getValidUIDs, { MAX_SUTTAS } from "./validate-uids.js";
+import getValidUIDs, { MAX_SUTTAS } from "../public/validate-uids.js";
+import { updateResponse } from "./firestore.js";
 
 /*
     1. Get valid sutta IDs
@@ -6,9 +7,14 @@ import getValidUIDs, { MAX_SUTTAS } from "./validate-uids.js";
     3. Call OpenAI API with the prompt and list of valid UIDs
 */
 
-async function readStream({ event, summaryElem, responseElem }) {
+const formElem = document.querySelector("form");
+formElem.onsubmit = readStream;
+
+async function readStream(event) {
     try {
         event.preventDefault();
+        const summaryElem = document.querySelector("footer"),
+            responseElem = document.querySelector("#response");
         summaryElem.style.display = "none";
         responseElem.style.textAlign = "center";
         responseElem.textContent = "Asking...";
@@ -33,8 +39,11 @@ async function readStream({ event, summaryElem, responseElem }) {
             // value - some data. Always undefined when done is true.
             if (done) {
                 console.log("Stream complete!");
-                responseElem.innerHTML = parseContent(responseElem.textContent);
-                showSummary({ uids, summaryElem });
+                const response = parseContent(responseElem.textContent),
+                    summary = getSummary(uids);
+                responseElem.innerHTML = response;
+                showSummary({ summaryElem, summary });
+                updateResponse({ prompt, response, summary });
             } else {
                 const decoded = new TextDecoder().decode(value);
                 responseElem.textContent += decoded;
@@ -112,26 +121,28 @@ function formatMatch(m) {
     return m.toLowerCase();
 }
 
-function showSummary({ uids, summaryElem }) {
+function showSummary({ summaryElem, summary }) {
+    summaryElem.innerHTML = summary;
+    summaryElem.style.display = "block";
+}
+
+function getSummary(uids) {
     const listItems = Object.entries(uids)
         .map(
             ([uid, blurb]) => `
-                <li>
-                    <strong>
-                        <a
-                            href="/suttas/?uid=${uid}"
-                            target="_blank"
-                            rel="noopener"
-                        >${uid}</a>${blurb ? ":" : ""}
-                    </strong>
-                    ${blurb || ""}
-                </li>`
+            <li>
+                <strong>
+                    <a
+                        href="/suttas/?uid=${uid}"
+                        target="_blank"
+                        rel="noopener"
+                    >${uid}</a>${blurb ? ":" : ""}
+                </strong>
+                ${blurb || ""}
+            </li>`
         )
         .join("");
-    summaryElem.innerHTML = `
-        <h2>References</h2>
-        <ul>${listItems}</ul>`;
-    summaryElem.style.display = "block";
+    return `<h2>References</h2><ul>${listItems}</ul>`;
 }
 
 export default readStream;
