@@ -5,6 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="/css/style.css">
         <link rel="stylesheet" href="/css/sign-in.css">
+        <style>
+            #verify-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+        </style>
         <title>Maitreya &mdash; Verify Email</title>
     </head>
     <body>
@@ -12,9 +20,11 @@
             <h1>Maitreya</h1>
             <h2>Verify Email</h2>
             <p>The email address for this account is not verified. Please click the link in your email.</p>
-            <button id="resend-verify">resend verification link</button>
-            <button onclick="window.location.reload()">refresh page</button>
-            <button id="sign-out">sign out</button>
+            <div id="verify-buttons">
+                <button id="resend-verify">resend verification link</button>
+                <button onclick="window.location.reload()">refresh page</button>
+                <button id="sign-out">sign out</button>
+            </div>
         </main>
 
         <script src="/scripts/auth.js"></script>
