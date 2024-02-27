@@ -11,20 +11,20 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         if (!user.emailVerified) {
             if (!isVerifyPage) {
-                window.location.href = "/verify.html";
+                window.location.replace("/verify.html");
             } else {
                 displayMain();
             }
             return;
         }
         if (isSignInUpOrVerify) {
-            window.location.href = "/";
+            window.location.replace("/");
             return;
         }
         await getLastResponse();
     }
     if (!user && !isSignInOrUp) {
-        window.location.href = "/sign-in.html";
+        window.location.replace("/sign-in.html");
         return;
     }
     displayMain();
