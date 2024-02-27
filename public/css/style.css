@@ -129,6 +129,47 @@ h1 {
     text-align: center;
 }
 
+header#menu {
+    --max-width: 350px;
+    --min-width: 275px;
+    --width: 60%;
+
+    height: 100vh;
+    max-width: var(--max-width);
+    min-width: var(--min-width);
+    width: var(--width);
+    background-color: #222;
+    overflow: auto;
+    position: fixed;
+    top: 0;
+    right: clamp(
+        calc(100vw - var(--max-width)),
+        calc(100vw - var(--width)),
+        calc(100vw - var(--min-width))
+    );
+    text-align: center;
+    transition: 1s;
+
+    &.closed {
+        right: 100vw;
+    }
+
+    & button.toggle-menu {
+        min-width: auto;
+        width: 30px;
+        height: 30px;
+        line-height: 0;
+        padding: 0;
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    & h2 {
+        margin-top: 40px;
+    }
+}
+
 input,
 select,
 textarea {

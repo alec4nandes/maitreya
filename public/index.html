@@ -7,10 +7,16 @@
         <title>Maitreya</title>
     </head>
     <body>
+        <header id="menu" class="closed">
+            <button class="toggle-menu">X</button>
+            <h2>Saved Responses</h2>
+        </header>
         <main style="display: none;">
             <h1>Maitreya</h1>
             <nav>
                 <a href="/suttas">Suttas</a>
+                &nbsp;|&nbsp;
+                <button class="text-button toggle-menu">Saved Responses</button>
                 &nbsp;|&nbsp;
                 <button id="sign-out" class="text-button">Sign Out</button>
             </nav>
@@ -25,5 +31,6 @@
         <script src="/scripts/auth.js"></script>
         <script src="/scripts/openai.js"></script>
         <script src="/scripts/sign-out.js"></script>
+        <script src="/menu.js"></script>
     </body>
 </html>
