@@ -1,8 +1,8 @@
 import uids from "./suttas/uids.js";
 
-const MAX_SUTTAS = 3;
+const SUTTA_COUNT = 5;
 
-async function getValidUIDs({ prompt, level = 0 }) {
+async function getValidUIDs({ prompt, level = 1, result = {} }) {
     const params = getParamsForUIDs(prompt),
         uids = await fetchUIDs(params);
     console.log(uids);
@@ -14,32 +14,34 @@ async function getValidUIDs({ prompt, level = 0 }) {
             console.error(error);
         }
     }
-    const result = valid
-        .filter(({ uid }) => uid)
-        .reduce(
-            (acc, { uid, blurb }) =>
-                uid in acc ? acc : { ...acc, [uid]: blurb },
-            {}
-        );
-    return Object.entries(result).length
+    result = {
+        ...result,
+        ...valid
+            .filter(({ uid }) => uid)
+            .reduce(
+                (acc, { uid, blurb }) =>
+                    uid in acc || uid in result
+                        ? acc
+                        : { ...acc, [uid]: blurb },
+                {}
+            ),
+    };
+    console.log(result);
+    const { length } = Object.entries(result),
+        above2 = level > 2;
+    return length >= SUTTA_COUNT || (length && above2)
         ? result
-        : level > 2
+        : above2
         ? null
-        : await getValidUIDs({ prompt, level: level + 1 });
+        : await getValidUIDs({ prompt, level: level + 1, result });
 }
 
 function getParamsForUIDs(prompt) {
     const systemContent =
-        "Respond only with a comma-separated list of Buddhist sutta IDs " +
-        "that relate to each prompt. " +
-        "Order the list from most relevant to least relevant " +
-        `with no more than ${MAX_SUTTAS} IDs. ` +
-        "Every Buddhist sutta has a unique abbreviated ID. " +
-        "Format each one according to these rules: " +
-        "1. Remove all spaces. " +
-        "2. The first numeric digit must immediately follow a letter. " +
-        "3. Change all letters to lowercase. " +
-        '4. If the ID is for Dhammapada text, use the abbreviation "dhp".';
+        "Respond only with a comma-separated list of IDs for Buddhist suttas " +
+        "that relate to this prompt. " +
+        `The list must have ${SUTTA_COUNT} IDs. ` +
+        'If the ID is for Dhammapada text, use the abbreviation "dhp".';
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -67,10 +69,12 @@ async function fetchUIDs(params) {
         ),
         { choices } = await response.json(),
         result = choices[0].message.content;
-    return result
-        .split(",")
-        .map((uid) => uid.trim())
-        .filter(Boolean);
+    console.log(result);
+    return result.split(",").map(formatMatch).filter(Boolean);
+}
+
+function formatMatch(m) {
+    return m.trim().replaceAll(" ", "").toLowerCase();
 }
 
 async function fetchSuttaplexUID(uid) {
@@ -105,4 +109,4 @@ async function fetcher(url) {
 }
 
 export default getValidUIDs;
-export { MAX_SUTTAS, fetchSuttaplexUID, fetcher };
+export { fetchSuttaplexUID, fetcher, formatMatch };

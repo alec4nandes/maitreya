@@ -1,5 +1,5 @@
 import { formatText, formatLegacyText } from "./format-sutta.js";
-import { fetchSuttaplexUID, fetcher } from "../validate-uids.js";
+import { fetchSuttaplexUID, fetcher } from "../uid-validate.js";
 import uids, { authors as authorsInfo } from "./uids.js";
 import { getSelect, addOptions } from "./selects.js";
 

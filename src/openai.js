@@ -1,5 +1,7 @@
-import getValidUIDs, { MAX_SUTTAS } from "../public/validate-uids.js";
+import getValidUIDs, { formatMatch } from "../public/uid-validate.js";
+import getBestUIDForPrompt from "../public/uid-best.js";
 import { saveResponse, updateResponse } from "./firestore.js";
+import uids from "../public/suttas/uids.js";
 
 /*
     1. Get valid sutta IDs
@@ -11,24 +13,25 @@ const formElem = document.querySelector("form");
 formElem.onsubmit = readStream;
 
 async function readStream(event) {
+    event.preventDefault();
+    const saveBtn = document.querySelector("button#save-response"),
+        summaryElem = document.querySelector("footer"),
+        responseElem = document.querySelector("#response");
     try {
-        event.preventDefault();
-        const saveBtn = document.querySelector("button#save-response"),
-            summaryElem = document.querySelector("footer"),
-            responseElem = document.querySelector("#response");
         saveBtn.disabled = true;
         summaryElem.style.display = "none";
         responseElem.style.textAlign = "center";
         responseElem.textContent = "Asking...";
         const prompt = event.target.prompt.value.trim(),
-            uids = await getValidUIDs({ prompt });
-        if (!uids) {
+            uids = await getValidUIDs({ prompt }),
+            bestUID = uids && (await getBestUIDForPrompt({ prompt, uids }));
+        if (!bestUID) {
             responseElem.textContent =
                 "There are no valid suttas that match your question. " +
                 "Please ask something else.";
             return;
         }
-        const params = getParamsForOpenAi({ uids, prompt }),
+        const params = getParamsForOpenAi({ uids: bestUID, prompt }),
             stream = await fetchStream(params),
             reader = stream.getReader();
         // read() returns a promise that fulfills
@@ -42,10 +45,10 @@ async function readStream(event) {
             if (done) {
                 console.log("Stream complete!");
                 const response = parseContent(responseElem.textContent),
-                    summary = getSummary(uids);
+                    summary = getSummary(bestUID);
                 responseElem.innerHTML = response;
                 showSummary({ summaryElem, summary });
-                const dbParams = { prompt, response, summary, uids };
+                const dbParams = { prompt, response, summary, uids: bestUID };
                 updateResponse(dbParams);
                 saveBtn.textContent = "save response";
                 saveBtn.onclick = () => saveResponse(dbParams);
@@ -58,7 +61,8 @@ async function readStream(event) {
             return !done && reader.read().then(processText);
         });
     } catch (err) {
-        responseElem.textContent = err.message;
+        console.error(err);
+        responseElem.textContent = "There has been an error. Please try again.";
     }
 }
 
@@ -66,7 +70,7 @@ function getParamsForOpenAi({ uids, prompt }) {
     const systemContent =
         "You are the next Buddha named Maitreya. " +
         "You give advice based on Buddhist suttas. " +
-        `Do not write more than ${MAX_SUTTAS} paragraphs.`;
+        `Do not write more than two paragraphs.`;
     return {
         model: "gpt-3.5-turbo",
         messages: [
@@ -85,15 +89,17 @@ function getParamsForOpenAi({ uids, prompt }) {
 }
 
 function getPrompt({ uids, prompt }) {
+    const [uid, blurb] = Object.entries(uids)[0];
     return (
-        "Here are a list of sutta IDs: " +
-        Object.keys(uids).join(", ") +
-        ". Do not expand on a hypenated range of verses, for example dhp1-20. " +
-        "Treat them as a single unit. " +
-        "Write a separate paragraph for each ID that begins with the ID " +
-        "followed by a colon. After the colon, without mentioning the ID again, " +
-        "explain how each sutta ID relates to the following prompt: " +
-        prompt
+        (blurb
+            ? `Here is a quick summary of the sutta with the ID ${uid}: ` +
+              `"${blurb}" ` +
+              "\n\nPlease explain why it matches so well with this prompt: " +
+              `"${prompt}"`
+            : `Please explain why the sutta with the ID ${uid} fits ` +
+              `so well with this prompt: "${prompt}"`) +
+        "\n\nIn your answer, please mention the sutta ID again in the same format. " +
+        "Please do not provide any standalone references to this ID."
     );
 }
 
@@ -110,21 +116,20 @@ async function fetchStream(params) {
 }
 
 function parseContent(content) {
-    const regExp = new RegExp(/[A-Za-z]{2,4}[0-9]+[\.0-9\-]*/g),
-        matches = [...new Set(content.match(regExp) || [])];
+    const regExp = new RegExp(/[A-Za-z]{2,4}[ ]{0,1}[0-9]+[\.0-9\-]*/g),
+        matches = [...new Set(content.match(regExp) || [])],
+        uidKeys = Object.keys(uids);
     for (const m of matches) {
-        content = content.replaceAll(
-            m,
-            `<a href="/suttas/?uid=${formatMatch(
-                m
-            )}" rel="noopener" target="_blank">${m}</a>`
-        );
+        const formatted = formatMatch(m);
+        if (uidKeys.includes(formatted)) {
+            content = content.replaceAll(
+                m,
+                `<a href="/suttas/?uid=${formatted}" ` +
+                    `rel="noopener" target="_blank">${formatted}</a>`
+            );
+        }
     }
     return content;
-}
-
-function formatMatch(m) {
-    return m.toLowerCase();
 }
 
 function showSummary({ summaryElem, summary }) {
