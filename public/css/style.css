@@ -175,27 +175,31 @@ header#menu {
     }
 
     & h2 {
-        margin-top: 40px;
+        margin-top: 50px;
     }
 
-    & #menu-content ul {
-        box-sizing: border-box;
-        padding: 0 15px;
+    & #menu-content {
+        padding-bottom: 60px;
 
-        & li {
-            list-style-type: none;
-            margin-bottom: 20px;
+        & ul {
+            box-sizing: border-box;
+            padding: 0 15px;
 
-            & p {
-                margin: 0;
+            & li {
+                list-style-type: none;
+                margin-bottom: 20px;
 
-                &.time {
-                    opacity: 0.8;
-                }
+                & p {
+                    margin: 0;
 
-                &.time,
-                &.uids {
-                    font-size: 0.8rem;
+                    &.time {
+                        opacity: 0.8;
+                    }
+
+                    &.time,
+                    &.uids {
+                        font-size: 0.8rem;
+                    }
                 }
             }
         }
