@@ -96,6 +96,7 @@ function parseContent(content) {
 function getSummary(bestPick) {
     const { uid, blurb } = bestPick;
     return `
+        <h2>Sutta Reference<h2/>
         <div id="summary">
             <strong>
                 <a
