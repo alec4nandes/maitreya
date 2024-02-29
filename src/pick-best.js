@@ -49,7 +49,7 @@ async function fetchbestPick({ params, uids }) {
         index = result - 1;
     console.log("INDEX:", index, `(${result})`);
     const [uid, blurb] = Object.entries(uids)[index];
-    return { [uid]: blurb };
+    return { uid, blurb };
 }
 
 export default getBestPick;

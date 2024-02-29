@@ -97,12 +97,8 @@ footer {
         text-align: center;
     }
 
-    & ul {
+    & #summary {
         margin: auto;
-
-        & li {
-            margin-bottom: 15px;
-        }
     }
 }
 
@@ -111,7 +107,7 @@ main {
     padding: 50px 15px;
 }
 
-footer ul,
+footer #summary,
 #response {
     max-width: 600px;
 }

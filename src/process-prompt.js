@@ -8,7 +8,6 @@ async function processPrompt(prompt) {
     const uids = await getValidUIDs({ prompt }),
         // Ask OpenAI to choose the most relevant blurb
         // and its sutta UID in relation to the prompt.
-        // TODO: change data from {uid: blurb} to {uid, blurb}
         bestPick = uids && (await getBestPick({ prompt, uids }));
     if (!bestPick) {
         return null;
@@ -26,7 +25,7 @@ async function fetchBestPickStream({ bestPick, prompt }) {
 }
 
 function getStreamPrompt({ bestPick, prompt }) {
-    const [uid, blurb] = Object.entries(bestPick)[0];
+    const { uid, blurb } = bestPick;
     return (
         (blurb
             ? `Here is a quick summary of the sutta with the ID ${uid}: ` +

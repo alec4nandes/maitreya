@@ -94,20 +94,16 @@ function parseContent(content) {
 }
 
 function getSummary(bestPick) {
-    const listItems = Object.entries(bestPick)
-        .map(
-            ([uid, blurb]) => `
-            <li>
-                <strong>
-                    <a
-                        href="/suttas/?uid=${uid}"
-                        target="_blank"
-                        rel="noopener"
-                    >${uid}</a>${blurb ? ":" : ""}
-                </strong>
-                ${blurb || ""}
-            </li>`
-        )
-        .join("");
-    return `<h2>References</h2><ul>${listItems}</ul>`;
+    const { uid, blurb } = bestPick;
+    return `
+        <div id="summary">
+            <strong>
+                <a
+                    href="/suttas/?uid=${uid}"
+                    target="_blank"
+                    rel="noopener"
+                >${uid}</a>${blurb ? ":" : ""}
+            </strong>
+            ${blurb || ""}
+        </div>`;
 }
