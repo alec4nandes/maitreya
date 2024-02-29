@@ -1,5 +1,5 @@
-import { sendEmailVerification } from "firebase/auth";
 import { auth } from "./db.js";
+import { sendEmailVerification } from "firebase/auth";
 
 document.querySelector("button#resend-verify").onclick = handleResendVerify;
 

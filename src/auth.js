@@ -1,6 +1,6 @@
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./db.js";
 import { getLastResponse, getSavedResponses } from "./firestore.js";
+import { onAuthStateChanged } from "firebase/auth";
 
 // reload page if auth state doesn't load
 // (lags sometimes on mobile, but reload fixes it)

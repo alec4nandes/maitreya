@@ -1,7 +1,7 @@
-import { formatText, formatLegacyText } from "./format-sutta.js";
-import { fetchSuttaplexUID, fetcher } from "../uid-validate.js";
-import uids, { authors as authorsInfo } from "./uids.js";
-import { getSelect, addOptions } from "./selects.js";
+import { addOptions, getSelect } from "./selects.js";
+import { fetcher, fetchSuttaplexUID } from "../uid-validate.js";
+import { formatLegacyText, formatText } from "./format-sutta.js";
+import uids, { authors as authorsInfo } from "../uids.js";
 
 async function getSutta() {
     const { uid, authors, authorParam } = await getUID();

@@ -1,5 +1,5 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./db.js";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 document.querySelector("form#sign-in").onsubmit = handleSignIn;
 

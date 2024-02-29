@@ -1,36 +1,4 @@
-function formatText({ data, authorName }) {
-    const title = getTitle({ data, authorName }),
-        sutta = getSuttaTable(data);
-    document.querySelector("#title").innerHTML = title;
-    document.querySelector("#sutta").innerHTML = sutta;
-}
-
-function getTitle({ data, authorName }) {
-    const keys = Object.keys(data),
-        titleKeys = keys.filter(
-            // line number starts with 0
-            (key) => key.split(":")[1].split(".")[0] === "0"
-        ),
-        titleLines = titleKeys.map((key) => {
-            const result = data[key];
-            delete data[key];
-            return result;
-        }),
-        headings = titleLines
-            .map((line, i) => `<h${i + 2}>${line}</h${i + 2}>`)
-            .join("");
-    return `
-        ${headings}
-        <em>by ${authorName}</em>
-    `;
-}
-
-function getSuttaTable(data) {
-    const rows = Object.entries(data)
-        .map(([key, line]) => `<tr><td>${key}</td><td>${line}</td></tr>`)
-        .join("");
-    return `<table>${rows}</table>`;
-}
+// LEGACY TEXT
 
 function formatLegacyText({ data, authorName }) {
     const div = document.createElement("div");
@@ -99,4 +67,40 @@ function getCopyrightIndex({ paragraphs, authorName }) {
     return null;
 }
 
-export { formatText, formatLegacyText };
+// NORMAL TEXT
+
+function formatText({ data, authorName }) {
+    const title = getTitle({ data, authorName }),
+        sutta = getSuttaTable(data);
+    document.querySelector("#title").innerHTML = title;
+    document.querySelector("#sutta").innerHTML = sutta;
+}
+
+function getTitle({ data, authorName }) {
+    const keys = Object.keys(data),
+        titleKeys = keys.filter(
+            // line number starts with 0
+            (key) => key.split(":")[1].split(".")[0] === "0"
+        ),
+        titleLines = titleKeys.map((key) => {
+            const result = data[key];
+            delete data[key];
+            return result;
+        }),
+        headings = titleLines
+            .map((line, i) => `<h${i + 2}>${line}</h${i + 2}>`)
+            .join("");
+    return `
+        ${headings}
+        <em>by ${authorName}</em>
+    `;
+}
+
+function getSuttaTable(data) {
+    const rows = Object.entries(data)
+        .map(([key, line]) => `<tr><td>${key}</td><td>${line}</td></tr>`)
+        .join("");
+    return `<table>${rows}</table>`;
+}
+
+export { formatLegacyText, formatText };

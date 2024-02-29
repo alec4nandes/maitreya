@@ -115,22 +115,6 @@ async function deleteSavedResponse(time) {
     }
 }
 
-async function updateResponse({ prompt, response, summary, uids }) {
-    try {
-        const docRef = getDocRef(),
-            docExists = (await getDoc(docRef)).exists();
-        await (docExists ? updateDoc : setDoc)(getDocRef(), {
-            last_prompt: prompt,
-            last_response: response,
-            last_summary: summary,
-            last_uids: uids,
-        });
-    } catch (err) {
-        console.error(err);
-        alert(err.message);
-    }
-}
-
 async function saveResponse({ prompt, response, summary, uids }) {
     try {
         await updateDoc(getDocRef(), {
@@ -150,9 +134,25 @@ async function saveResponse({ prompt, response, summary, uids }) {
     }
 }
 
+async function updateResponse({ prompt, response, summary, uids }) {
+    try {
+        const docRef = getDocRef(),
+            docExists = (await getDoc(docRef)).exists();
+        await (docExists ? updateDoc : setDoc)(getDocRef(), {
+            last_prompt: prompt,
+            last_response: response,
+            last_summary: summary,
+            last_uids: uids,
+        });
+    } catch (err) {
+        console.error(err);
+        alert(err.message);
+    }
+}
+
 function getDocRef() {
     const docRef = doc(firestore, "users", auth.currentUser.email);
     return docRef;
 }
 
-export { getLastResponse, getSavedResponses, updateResponse, saveResponse };
+export { getLastResponse, getSavedResponses, saveResponse, updateResponse };

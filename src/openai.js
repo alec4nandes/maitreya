@@ -1,18 +1,12 @@
-import getValidUIDs, { formatMatch } from "../public/uid-validate.js";
-import getBestUIDForPrompt from "../public/uid-best.js";
+import { formatMatch } from "../public/scripts/uid-validate.js";
+import processPrompt from "./process-prompt.js";
 import { saveResponse, updateResponse } from "./firestore.js";
-import uids from "../public/suttas/uids.js";
-
-/*
-    1. Get valid sutta IDs
-    2. If no valid UIDs, show generic message
-    3. Call OpenAI API with the prompt and list of valid UIDs
-*/
+import uids from "../public/scripts/uids.js";
 
 const formElem = document.querySelector("form");
-formElem.onsubmit = readStream;
+formElem.onsubmit = handleAsk;
 
-async function readStream(event) {
+async function handleAsk(event) {
     event.preventDefault();
     const saveBtn = document.querySelector("button#save-response"),
         summaryElem = document.querySelector("footer"),
@@ -23,42 +17,20 @@ async function readStream(event) {
         responseElem.style.textAlign = "center";
         responseElem.textContent = "Asking...";
         const prompt = event.target.prompt.value.trim(),
-            uids = await getValidUIDs({ prompt }),
-            bestUID = uids && (await getBestUIDForPrompt({ prompt, uids }));
-        if (!bestUID) {
+            { bestPick, stream } = await processPrompt(prompt);
+        if (!stream) {
             responseElem.textContent =
                 "There are no valid suttas that match your question. " +
                 "Please ask something else.";
             return;
         }
-        const params = getParamsForOpenAi({ uids: bestUID, prompt }),
-            stream = await fetchStream(params),
-            reader = stream.getReader();
-        // read() returns a promise that fulfills
-        // when a value has been received
-        responseElem.textContent = "";
-        responseElem.style.textAlign = "left";
-        reader.read().then(function processText({ done, value }) {
-            // Result objects contain two properties:
-            // done  - true if the stream has already given you all its data.
-            // value - some data. Always undefined when done is true.
-            if (done) {
-                console.log("Stream complete!");
-                const response = parseContent(responseElem.textContent),
-                    summary = getSummary(bestUID);
-                responseElem.innerHTML = response;
-                showSummary({ summaryElem, summary });
-                const dbParams = { prompt, response, summary, uids: bestUID };
-                updateResponse(dbParams);
-                saveBtn.textContent = "save response";
-                saveBtn.onclick = () => saveResponse(dbParams);
-                saveBtn.disabled = false;
-            } else {
-                const decoded = new TextDecoder().decode(value);
-                responseElem.textContent += decoded;
-            }
-            // Read some more, and call this function again
-            return !done && reader.read().then(processText);
+        readStream({
+            stream,
+            responseElem,
+            bestPick,
+            summaryElem,
+            prompt,
+            saveBtn,
         });
     } catch (err) {
         console.error(err);
@@ -66,53 +38,42 @@ async function readStream(event) {
     }
 }
 
-function getParamsForOpenAi({ uids, prompt }) {
-    const systemContent =
-        "You are the next Buddha named Maitreya. " +
-        "You give advice based on Buddhist suttas. " +
-        `Do not write more than two paragraphs.`;
-    return {
-        model: "gpt-3.5-turbo",
-        messages: [
-            {
-                role: "system",
-                content: systemContent,
-            },
-            {
-                role: "user",
-                content: getPrompt({ uids, prompt }),
-            },
-        ],
-        temperature: 0.4,
-        apiKeyName: "OPENAI_API_KEY_MAITREYA",
-    };
-}
-
-function getPrompt({ uids, prompt }) {
-    const [uid, blurb] = Object.entries(uids)[0];
-    return (
-        (blurb
-            ? `Here is a quick summary of the sutta with the ID ${uid}: ` +
-              `"${blurb}" ` +
-              "\n\nPlease explain why it matches so well with this prompt: " +
-              `"${prompt}"`
-            : `Please explain why the sutta with the ID ${uid} fits ` +
-              `so well with this prompt: "${prompt}"`) +
-        "\n\nIn your answer, please mention the sutta ID again in the same format. " +
-        "Please do not provide any standalone references to this ID."
-    );
-}
-
-async function fetchStream(params) {
-    const response = await fetch(
-        "https://uf663xchsyh44bikbn723q7ewq0xqoaz.lambda-url.us-east-2.on.aws/",
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(params),
+function readStream({
+    stream,
+    responseElem,
+    bestPick,
+    summaryElem,
+    prompt,
+    saveBtn,
+}) {
+    const reader = stream.getReader();
+    // read() returns a promise that fulfills
+    // when a value has been received
+    responseElem.textContent = "";
+    responseElem.style.textAlign = "left";
+    reader.read().then(function processText({ done, value }) {
+        // Result objects contain two properties:
+        // done  - true if the stream has already given you all its data.
+        // value - some data. Always undefined when done is true.
+        if (done) {
+            console.log("Stream complete!");
+            const response = parseContent(responseElem.textContent),
+                summary = getSummary(bestPick);
+            responseElem.innerHTML = response;
+            summaryElem.innerHTML = summary;
+            summaryElem.style.display = "block";
+            const dbParams = { prompt, response, summary, uids: bestPick };
+            updateResponse(dbParams);
+            saveBtn.textContent = "save response";
+            saveBtn.onclick = () => saveResponse(dbParams);
+            saveBtn.disabled = false;
+        } else {
+            const decoded = new TextDecoder().decode(value);
+            responseElem.textContent += decoded;
         }
-    );
-    return response.body;
+        // Read some more, and call this function again
+        return !done && reader.read().then(processText);
+    });
 }
 
 function parseContent(content) {
@@ -132,13 +93,8 @@ function parseContent(content) {
     return content;
 }
 
-function showSummary({ summaryElem, summary }) {
-    summaryElem.innerHTML = summary;
-    summaryElem.style.display = "block";
-}
-
-function getSummary(uids) {
-    const listItems = Object.entries(uids)
+function getSummary(bestPick) {
+    const listItems = Object.entries(bestPick)
         .map(
             ([uid, blurb]) => `
             <li>

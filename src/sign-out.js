@@ -1,5 +1,5 @@
-import { signOut } from "firebase/auth";
 import { auth } from "./db.js";
+import { signOut } from "firebase/auth";
 
 document.querySelector("button#sign-out").onclick = handleSignOut;
 

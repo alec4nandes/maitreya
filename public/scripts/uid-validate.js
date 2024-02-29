@@ -1,4 +1,4 @@
-import uids from "./suttas/uids.js";
+import uids from "./uids.js";
 
 const SUTTA_COUNT = 5;
 
@@ -109,4 +109,4 @@ async function fetcher(url) {
 }
 
 export default getValidUIDs;
-export { fetchSuttaplexUID, fetcher, formatMatch };
+export { fetcher, fetchSuttaplexUID, formatMatch };

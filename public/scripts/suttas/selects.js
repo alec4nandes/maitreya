@@ -1,4 +1,4 @@
-import uids, { authors } from "./uids.js";
+import uids, { authors } from "../uids.js";
 
 function buildSelects() {
     const selectUid = getSelect("uid"),
@@ -43,4 +43,4 @@ function addOptions({ elem, arr, showName }) {
 }
 
 export default buildSelects;
-export { getSelect, addOptions };
+export { addOptions, getSelect };

@@ -1,11 +1,11 @@
-async function getBestUIDForPrompt({ prompt, uids }) {
-    const params = getParamsForBestUID({ prompt, uids }),
-        result = await fetchBestUID({ params, uids });
+async function getBestPick({ prompt, uids }) {
+    const params = getParamsForbestPick({ prompt, uids }),
+        result = await fetchbestPick({ params, uids });
     console.log(result);
     return result;
 }
 
-function getParamsForBestUID({ prompt, uids }) {
+function getParamsForbestPick({ prompt, uids }) {
     const systemContent =
             "For this prompt, respond only with a single number. " +
             "This number should match the prompt's numbered " +
@@ -33,7 +33,7 @@ function getParamsForBestUID({ prompt, uids }) {
     };
 }
 
-async function fetchBestUID({ params, uids }) {
+async function fetchbestPick({ params, uids }) {
     const response = await fetch(
             "https://nsr23vt5ps2kdjj2ypy2ypvlpe0oxnqb.lambda-url.us-east-2.on.aws/",
             {
@@ -50,4 +50,4 @@ async function fetchBestUID({ params, uids }) {
     return { [uid]: blurb };
 }
 
-export default getBestUIDForPrompt;
+export default getBestPick;

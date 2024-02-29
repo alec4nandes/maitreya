@@ -1,8 +1,8 @@
+import { auth } from "./db.js";
 import {
     createUserWithEmailAndPassword,
     sendEmailVerification,
 } from "firebase/auth";
-import { auth } from "./db.js";
 
 document.querySelector("form#sign-up").onsubmit = handleSignUp;
 
