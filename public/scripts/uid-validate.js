@@ -2,6 +2,9 @@ import uids from "./uids.js";
 
 const SUTTA_COUNT = 5;
 
+// Ask OpenAI to provide a list of UIDs for suttas that relate to the prompt.
+// Then see if those UIDs are valid for SuttaCentral by checking the Suttaplex.
+// If valid, also get the sutta's blurb (short description) from the Suttaplex.
 async function getValidUIDs({ prompt, level = 1, result = {} }) {
     const params = getParamsForUIDs(prompt),
         uids = await fetchUIDs(params);

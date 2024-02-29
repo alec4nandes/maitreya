@@ -1,3 +1,5 @@
+// Ask OpenAI to choose the most relevant blurb
+// and its sutta UID in relation to the prompt.
 async function getBestPick({ prompt, uids }) {
     const params = getParamsForbestPick({ prompt, uids }),
         result = await fetchbestPick({ params, uids });

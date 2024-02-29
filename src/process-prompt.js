@@ -6,7 +6,8 @@ async function processPrompt(prompt) {
     // Then see if those UIDs are valid for SuttaCentral by checking the Suttaplex.
     // If valid, also get the sutta's blurb (short description) from the Suttaplex.
     const uids = await getValidUIDs({ prompt }),
-        // Ask OpenAI to choose the most relevant blurb and its sutta UID in relation to the prompt.
+        // Ask OpenAI to choose the most relevant blurb
+        // and its sutta UID in relation to the prompt.
         // TODO: change data from {uid: blurb} to {uid, blurb}
         bestPick = uids && (await getBestPick({ prompt, uids }));
     if (!bestPick) {
