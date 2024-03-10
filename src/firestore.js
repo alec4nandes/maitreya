@@ -4,23 +4,48 @@ import { auth, firestore } from "./db.js";
 async function getLastResponse() {
     try {
         const textarea = document.querySelector('textarea[name="prompt"]'),
+            lastSavedTime = document.querySelector("#last-saved-time"),
             responseElem = document.querySelector("#response"),
             summaryElem = document.querySelector("footer"),
             saveBtn = document.querySelector("button#save-response"),
-            { last_prompt, last_response, last_summary, last_uids } = (
-                await getDoc(getDocRef())
-            ).data();
+            {
+                last_prompt,
+                last_response,
+                last_summary,
+                last_uids,
+                last_saved_time,
+            } = (await getDoc(getDocRef())).data();
         textarea.value = last_prompt;
+        if (last_saved_time) {
+            lastSavedTime.innerHTML = `<em>saved on ${formatTime(
+                last_saved_time
+            )}</em>`;
+        }
         responseElem.innerHTML = last_response;
         summaryElem.innerHTML = last_summary;
         summaryElem.style.display = "block";
-        saveBtn.onclick = () =>
-            saveResponse({
-                prompt: last_prompt,
-                response: last_response,
-                summary: last_summary,
-                uids: last_uids,
-            });
+        saveBtn.textContent = last_saved_time
+            ? "delete response"
+            : "save response";
+        saveBtn.onclick = async () => {
+            if (last_saved_time) {
+                await updateResponse({
+                    prompt: last_prompt,
+                    response: last_response,
+                    summary: last_summary,
+                    uids: last_uids,
+                    saved_time: false,
+                });
+                await deleteSavedResponse(last_saved_time);
+            } else {
+                saveResponse({
+                    prompt: last_prompt,
+                    response: last_response,
+                    summary: last_summary,
+                    uids: last_uids,
+                });
+            }
+        };
         saveBtn.disabled = false;
     } catch (err) {
         console.error(err.message);
@@ -57,7 +82,7 @@ function formatSavedResponses(saved) {
             btn.classList.add("text-button");
             btn.textContent = prompt;
             btn.onclick = () =>
-                showSavedResponse({ time, prompt, response, summary });
+                showSavedResponse({ time, prompt, response, summary, uids });
             li.appendChild(btn);
 
             const pUids = document.createElement("p"),
@@ -83,12 +108,14 @@ function formatTime(time) {
     return new Date(time).toLocaleString();
 }
 
-function showSavedResponse({ time, prompt, response, summary }) {
-    const saveBtn = document.querySelector("button#save-response"),
+async function showSavedResponse({ time, prompt, response, summary, uids }) {
+    const lastSavedTime = document.querySelector("#last-saved-time"),
+        saveBtn = document.querySelector("button#save-response"),
         textarea = document.querySelector('textarea[name="prompt"]'),
         responseElem = document.querySelector("#response"),
         summaryElem = document.querySelector("footer"),
         menu = document.querySelector("header#menu");
+    lastSavedTime.innerHTML = `<em>saved on ${formatTime(time)}</em>`;
     saveBtn.textContent = "delete response";
     saveBtn.onclick = () => deleteSavedResponse(time);
     textarea.value = prompt;
@@ -96,6 +123,7 @@ function showSavedResponse({ time, prompt, response, summary }) {
     summaryElem.innerHTML = summary;
     summaryElem.style.display = "block";
     menu.classList.add("closed");
+    await updateResponse({ prompt, response, summary, uids, saved_time: time });
 }
 
 async function deleteSavedResponse(time) {
@@ -117,14 +145,16 @@ async function deleteSavedResponse(time) {
 
 async function saveResponse({ prompt, response, summary, uids }) {
     try {
+        const time = new Date().getTime();
         await updateDoc(getDocRef(), {
             saved_responses: arrayUnion({
-                time: new Date().getTime(),
+                time,
                 prompt,
                 response,
                 summary,
                 uids,
             }),
+            last_saved_time: time,
         });
         alert("Response saved!");
         window.location.reload();
@@ -134,7 +164,7 @@ async function saveResponse({ prompt, response, summary, uids }) {
     }
 }
 
-async function updateResponse({ prompt, response, summary, uids }) {
+async function updateResponse({ prompt, response, summary, uids, saved_time }) {
     try {
         const docRef = getDocRef(),
             docExists = (await getDoc(docRef)).exists();
@@ -143,6 +173,7 @@ async function updateResponse({ prompt, response, summary, uids }) {
             last_response: response,
             last_summary: summary,
             last_uids: uids,
+            last_saved_time: saved_time,
         });
     } catch (err) {
         console.error(err);

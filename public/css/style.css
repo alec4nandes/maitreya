@@ -51,7 +51,7 @@ button {
 
     &#save-response {
         display: block;
-        margin: 30px auto auto;
+        margin: auto;
 
         &:disabled {
             display: none;
@@ -125,7 +125,7 @@ form#ask {
     }
 
     & button[type="submit"] {
-        margin: auto;
+        margin: auto auto 30px;
     }
 }
 
@@ -154,6 +154,7 @@ header#menu {
     );
     text-align: center;
     transition: 1s;
+    z-index: 999;
 
     &.closed {
         right: 100vw;
@@ -207,6 +208,11 @@ select,
 textarea {
     background-color: var(--accent-4);
     padding: 5px;
+}
+
+#last-saved-time {
+    opacity: 0.8;
+    text-align: center;
 }
 
 nav {

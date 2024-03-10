@@ -8,10 +8,12 @@ formElem.onsubmit = handleAsk;
 
 async function handleAsk(event) {
     event.preventDefault();
-    const saveBtn = document.querySelector("button#save-response"),
+    const lastSavedTime = document.querySelector("#last-saved-time"),
+        saveBtn = document.querySelector("button#save-response"),
         summaryElem = document.querySelector("footer"),
         responseElem = document.querySelector("#response");
     try {
+        lastSavedTime.textContent = "";
         saveBtn.disabled = true;
         summaryElem.style.display = "none";
         responseElem.style.textAlign = "center";
@@ -46,11 +48,11 @@ function readStream({
     prompt,
     saveBtn,
 }) {
-    const reader = stream.getReader();
-    // read() returns a promise that fulfills
-    // when a value has been received
     responseElem.textContent = "";
     responseElem.style.textAlign = "left";
+    // read() returns a promise that fulfills
+    // when a value has been received
+    const reader = stream.getReader();
     reader.read().then(function processText({ done, value }) {
         // Result objects contain two properties:
         // done  - true if the stream has already given you all its data.
@@ -62,7 +64,13 @@ function readStream({
             responseElem.innerHTML = response;
             summaryElem.innerHTML = summary;
             summaryElem.style.display = "block";
-            const dbParams = { prompt, response, summary, uids: bestPick };
+            const dbParams = {
+                prompt,
+                response,
+                summary,
+                uids: bestPick,
+                saved_time: false,
+            };
             updateResponse(dbParams);
             saveBtn.textContent = "save response";
             saveBtn.onclick = () => saveResponse(dbParams);
@@ -78,8 +86,11 @@ function readStream({
 
 function parseContent(content) {
     const regExp = new RegExp(/[A-Za-z]{2,4}[ ]{0,1}[0-9]+[\.0-9\-]*/g),
-        matches = [...new Set(content.match(regExp) || [])],
-        uidKeys = Object.keys(uids);
+        matches = [...new Set(content.match(regExp) || [])];
+    // make sure there are no incorrect overwrites
+    // (ex. sn1.2 should not replace [sn1.2]3)
+    matches.sort().reverse();
+    const uidKeys = Object.keys(uids);
     for (const m of matches) {
         const formatted = formatMatch(m);
         if (uidKeys.includes(formatted)) {
