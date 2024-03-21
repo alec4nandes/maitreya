@@ -1,3 +1,9 @@
+/*
+    This is the second step of the Sutta API.
+    The goal here is to pick the best sutta UID from the list
+    provided by getValidUIDs in ./get-uids.js (step 1).
+*/
+
 // Ask OpenAI to choose the most relevant blurb
 // and its sutta UID in relation to the prompt.
 async function getBestPick({ prompt, uids }) {

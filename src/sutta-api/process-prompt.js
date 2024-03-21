@@ -1,5 +1,17 @@
+/*
+    This is the third and final step of the Sutta API that
+    brings it all together.
+    The goal here is to take the list of valid sutta UIDs for
+    the user's input (see step 1 in ./get-uids.js) and then
+    pass it to getBestPick() to find the most appropriate UID
+    in the list (see step 2 in ./pick-best.js).
+    After getting the best UID, format the final prompt for
+    OpenAI and return the best pick data along with the
+    streamed response for display.
+*/
+
 import getBestPick from "./pick-best.js";
-import getValidUIDs from "../public/scripts/uid-validate.js";
+import getValidUIDs from "./get-uids.js";
 
 async function processPrompt(prompt) {
     // Ask OpenAI to provide a list of UIDs for suttas that relate to the prompt.

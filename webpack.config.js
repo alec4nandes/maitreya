@@ -13,4 +13,5 @@ module.exports = {
         filename: "[name]",
         path: path.resolve(__dirname, "public/scripts/webpack"),
     },
+    mode: "development",
 };
