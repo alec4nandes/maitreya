@@ -1,7 +1,7 @@
 import { formatMatch } from "./sutta-api/get-uids.js";
 import processPrompt from "./sutta-api/process-prompt.js";
 import { saveResponse, updateResponse } from "./firestore.js";
-// import uids from "../public/scripts/uids.js";
+import uids from "../public/scripts/uids.js";
 
 const formElem = document.querySelector("form");
 formElem.onsubmit = handleAsk;
@@ -90,16 +90,16 @@ function parseContent(content) {
     // make sure there are no incorrect overwrites
     // (ex. sn1.2 should not replace [sn1.2]3)
     matches.sort().reverse();
-    // const uidKeys = Object.keys(uids);
+    const uidKeys = Object.keys(uids);
     for (const m of matches) {
         const formatted = formatMatch(m);
-        // if (uidKeys.includes(formatted)) {
-        content = content.replaceAll(
-            m,
-            `<a href="/suttas/?uid=${formatted}" ` +
-                `rel="noopener" target="_blank">${formatted}</a>`
-        );
-        // }
+        if (uidKeys.includes(formatted)) {
+            content = content.replaceAll(
+                m,
+                `<a href="/suttas/?uid=${formatted}" ` +
+                    `rel="noopener" target="_blank">${formatted}</a>`
+            );
+        }
     }
     return content;
 }

@@ -4,7 +4,7 @@ import { formatLegacyText, formatText } from "./format-sutta.js";
 import uids, { authors as authorsInfo } from "../uids.js";
 
 async function getSutta() {
-    const { uid, authors, authorParam } = await getUID();
+    const { uid, authors, authorParam, blurb } = await getUID();
     if (!uid) {
         return;
     }
@@ -13,6 +13,7 @@ async function getSutta() {
     changeSelects({ uid, authors, author });
     const { text, legacyText } = await fetchText({ uid, author }),
         authorName = authorsInfo[author];
+    blurb && formatBlurb(blurb);
     text
         ? formatText({ data: text, authorName })
         : legacyText && formatLegacyText({ data: legacyText, authorName });
@@ -27,13 +28,14 @@ async function getUID() {
     if (!uid) {
         return { uid: null };
     }
-    const { uid: suttaplexUid } = await fetchSuttaplexUID(uid),
+    const { uid: suttaplexUid, blurb } = await fetchSuttaplexUID(uid),
         authorUids = uids[suttaplexUid];
     return authorUids
         ? {
               uid: suttaplexUid,
               authors: authorUids,
               authorParam: authorUids.includes(author) && author,
+              blurb,
           }
         : { uid: null };
 }
@@ -74,6 +76,10 @@ async function fetchText({ uid, author }) {
     url = `https://suttacentral.net/api/suttas/${uid}/${author}`;
     const legacyText = (await fetcher(url)).root_text.text;
     return { legacyText };
+}
+
+function formatBlurb(blurb) {
+    document.querySelector("#blurb").innerHTML = `<hr/><em>${blurb}</em><hr/>`;
 }
 
 function appendPrevAndNextBtns({ uid, author }) {
