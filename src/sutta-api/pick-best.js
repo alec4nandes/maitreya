@@ -4,16 +4,18 @@
     provided by getValidUIDs in ./get-uids.js (step 1).
 */
 
+import { auth } from "../db";
+
 // Ask OpenAI to choose the most relevant blurb
 // and its sutta UID in relation to the prompt.
 async function getBestPick({ prompt, uids }) {
-    const params = getParamsForbestPick({ prompt, uids }),
+    const params = await getParamsForBestPick({ prompt, uids }),
         result = await fetchbestPick({ params, uids });
     console.log(result);
     return result;
 }
 
-function getParamsForbestPick({ prompt, uids }) {
+async function getParamsForBestPick({ prompt, uids }) {
     const systemContent =
             "For this prompt, respond only with a single number. " +
             "This number should match the prompt's numbered " +
@@ -37,13 +39,14 @@ function getParamsForbestPick({ prompt, uids }) {
                 content: newPrompt,
             },
         ],
-        apiKeyName: "OPENAI_API_KEY_MAITREYA",
+        projectId: "MAITREYA",
+        token: await auth.currentUser.getIdToken(true),
     };
 }
 
 async function fetchbestPick({ params, uids }) {
     const response = await fetch(
-            "https://nsr23vt5ps2kdjj2ypy2ypvlpe0oxnqb.lambda-url.us-east-2.on.aws/",
+            "https://22bgimafvhroblvxfwaicex73e0khmzb.lambda-url.us-east-2.on.aws/",
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

@@ -5,6 +5,7 @@
 */
 
 import { fetchSuttaplexUID } from "../../public/scripts/uid-validate.js";
+import { auth } from "../db.js";
 
 const SUTTA_COUNT = 5;
 
@@ -12,7 +13,7 @@ const SUTTA_COUNT = 5;
 // Then see if those UIDs are valid for SuttaCentral by checking the Suttaplex.
 // If valid, also get the sutta's blurb (short description) from the Suttaplex.
 async function getValidUIDs({ prompt, level = 1, result = {} }) {
-    const params = getParamsForUIDs(prompt),
+    const params = await getParamsForUIDs(prompt),
         uids = await fetchUIDs(params);
     console.log(uids);
     const valid = [];
@@ -45,7 +46,7 @@ async function getValidUIDs({ prompt, level = 1, result = {} }) {
         : await getValidUIDs({ prompt, level: level + 1, result });
 }
 
-function getParamsForUIDs(prompt) {
+async function getParamsForUIDs(prompt) {
     const systemContent =
         "Respond only with a comma-separated list of IDs for Buddhist suttas " +
         "that relate to this prompt. " +
@@ -63,13 +64,14 @@ function getParamsForUIDs(prompt) {
                 content: prompt,
             },
         ],
-        apiKeyName: "OPENAI_API_KEY_MAITREYA",
+        projectId: "MAITREYA",
+        token: await auth.currentUser.getIdToken(true),
     };
 }
 
 async function fetchUIDs(params) {
     const response = await fetch(
-            "https://nsr23vt5ps2kdjj2ypy2ypvlpe0oxnqb.lambda-url.us-east-2.on.aws/",
+            "https://22bgimafvhroblvxfwaicex73e0khmzb.lambda-url.us-east-2.on.aws/",
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

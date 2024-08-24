@@ -5,7 +5,7 @@
     "main": "openai.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "firebase": "firebase serve --port 9271 --only hosting",
+        "serve": "firebase serve --only hosting",
         "build": "webpack",
         "watch": "webpack --watch",
         "deploy": "deploy.bat"

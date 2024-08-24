@@ -12,6 +12,7 @@
 
 import getBestPick from "./pick-best.js";
 import getValidUIDs from "./get-uids.js";
+import { auth } from "../db.js";
 
 async function processPrompt(prompt) {
     // Ask OpenAI to provide a list of UIDs for suttas that relate to the prompt.
@@ -31,7 +32,7 @@ async function processPrompt(prompt) {
 
 async function fetchBestPickStream({ bestPick, prompt }) {
     const streamPrompt = getStreamPrompt({ bestPick, prompt }),
-        params = getStreamParams(streamPrompt),
+        params = await getStreamParams(streamPrompt),
         stream = await fetchStream(params);
     return stream;
 }
@@ -51,7 +52,7 @@ function getStreamPrompt({ bestPick, prompt }) {
     );
 }
 
-function getStreamParams(streamPrompt) {
+async function getStreamParams(streamPrompt) {
     const systemContent =
         "You are the next Buddha named Maitreya. " +
         "You give advice based on Buddhist suttas. " +
@@ -69,13 +70,14 @@ function getStreamParams(streamPrompt) {
             },
         ],
         temperature: 0.4,
-        apiKeyName: "OPENAI_API_KEY_MAITREYA",
+        projectId: "MAITREYA",
+        token: await auth.currentUser.getIdToken(true),
     };
 }
 
 async function fetchStream(params) {
     const response = await fetch(
-        "https://uf663xchsyh44bikbn723q7ewq0xqoaz.lambda-url.us-east-2.on.aws/",
+        "https://qkhc7ig77yaaly33hd6i2he6yi0ydqdx.lambda-url.us-east-2.on.aws/",
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
