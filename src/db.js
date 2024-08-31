@@ -1,10 +1,9 @@
-import config, { devConfig } from "./credentials.js";
+import config from "./db-dev.mjs";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 
-const IS_DEVELOPMENT = false,
-    app = initializeApp(IS_DEVELOPMENT ? devConfig : config),
+const app = initializeApp(config),
     auth = getAuth(app),
     firestore = getFirestore(app);
 

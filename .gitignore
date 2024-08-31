@@ -1,5 +1,5 @@
 node_modules/
 firebase-debug.log
 .firebase/
-credentials.js
+db-dev.mjs
 public/scripts/webpack/
